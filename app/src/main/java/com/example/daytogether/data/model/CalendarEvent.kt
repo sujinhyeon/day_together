@@ -1,12 +1,11 @@
-package com.example.daytogether.data.model // 파일의 패키지 선언
+package com.example.daytogether.data.model
 
-import java.util.UUID // UUID를 사용하기 위해 import
+import java.time.LocalDate // LocalDate를 사용하기 위해 import 합니다.
+import java.util.UUID
 
 data class CalendarEvent(
-    val id: String = UUID.randomUUID().toString(), // 각 이벤트를 구분하기 위한 고유 ID
-    val description: String,                       // 일정 내용 (이것이 "Unresolved reference: description" 오류의 원인)
-    // 필요하다면 여기에 다른 속성들을 추가할 수 있습니다.
-    // 예: val startTime: Long? = null,
-    //     val endTime: Long? = null,
-    //     val color: String? = null
+    val id: String = UUID.randomUUID().toString(),
+    val description: String,
+    val date: LocalDate // 홈 화면에서 사용하는 날짜 정보를 저장할 필드
+    // 기타 필요한 필드들
 )

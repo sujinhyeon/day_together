@@ -507,66 +507,64 @@ fun EventDetailsDialog(
 fun MonthlyCalendarViewFullPreview() {
     DaytogetherTheme {
         val today = LocalDate.now()
+        // 각 CalendarEvent 생성 시 'date' 파라미터에 해당 날짜를 전달합니다.
         val dummyEvents = mapOf(
             today.plusDays(1) to listOf(
-                CalendarEvent(description = "회의"),
-                CalendarEvent(description = "점심 약속"),
-                CalendarEvent(description = "저녁 식사"),
-                CalendarEvent(description = "추가 일정")
+                CalendarEvent(description = "회의", date = today.plusDays(1)),
+                CalendarEvent(description = "점심 약속", date = today.plusDays(1)),
+                CalendarEvent(description = "저녁 식사", date = today.plusDays(1)),
+                CalendarEvent(description = "추가 일정", date = today.plusDays(1))
             ),
-            today.plusDays(2) to listOf(CalendarEvent(description = "발표 준비 데드라인")),
+            today.plusDays(2) to listOf(CalendarEvent(description = "발표 준비 데드라인", date = today.plusDays(2))),
             today.plusDays(3) to listOf(
-                CalendarEvent(description = "스터디"),
-                CalendarEvent(description = "운동"),
-                CalendarEvent(description = "장보기 목록 작성"),
-                CalendarEvent(description = "친구와 저녁 약속"),
-                CalendarEvent(description = "도서관 책 반납")
+                CalendarEvent(description = "스터디", date = today.plusDays(3)),
+                CalendarEvent(description = "운동", date = today.plusDays(3)),
+                CalendarEvent(description = "장보기 목록 작성", date = today.plusDays(3)),
+                CalendarEvent(description = "친구와 저녁 약속", date = today.plusDays(3)),
+                CalendarEvent(description = "도서관 책 반납", date = today.plusDays(3))
             ),
             today to listOf(
-                CalendarEvent(description = "오늘의 할일 1"),
-                CalendarEvent(description = "오늘의 할일 2"),
-                CalendarEvent(description = "오늘의 할일 3"),
-                CalendarEvent(description = "오늘의 할일 4 (길게 써보기 테스트으으으으으으으으으)"),
-                CalendarEvent(description = "오늘의 할일 5")
+                CalendarEvent(description = "오늘의 할일 1", date = today),
+                CalendarEvent(description = "오늘의 할일 2", date = today),
+                CalendarEvent(description = "오늘의 할일 3", date = today),
+                CalendarEvent(description = "오늘의 할일 4 (길게 써보기 테스트으으으으으으으으으)", date = today),
+                CalendarEvent(description = "오늘의 할일 5", date = today)
             ),
-            today.minusDays(2) to listOf(CalendarEvent(description = "지난 일정"))
+            today.minusDays(2) to listOf(CalendarEvent(description = "지난 일정", date = today.minusDays(2)))
         )
 
         var currentMonthPreview by remember { mutableStateOf(YearMonth.now()) }
-        // --- HomeScreen의 상태 로직을 흉내내기 위한 상태 변수들 ---
         var selectedDateForDetailsPreview by remember { mutableStateOf<LocalDate?>(null) }
-        var dateForBorderOnlyPreview by remember { mutableStateOf<LocalDate?>(null) } // <<< 이 상태 추가
-        // ---
+        var dateForBorderOnlyPreview by remember { mutableStateOf<LocalDate?>(null) }
 
-        Column(Modifier.background(ScreenBackground)) { // ScreenBackground는 테마에 정의되어 있어야 함
+        Column(Modifier.background(Color.White)) { // 예시로 ScreenBackground 대신 Color.White 사용
             MonthlyCalendarView(
                 currentMonth = currentMonthPreview,
                 onMonthChange = { newMonth ->
                     currentMonthPreview = newMonth
-                    // HomeScreen의 onMonthChange 처럼 상태 초기화
                     selectedDateForDetailsPreview = null
                     dateForBorderOnlyPreview = null
                     println("Month changed to: $newMonth")
                 },
-                onDateClick = { clickedDate -> // HomeScreen의 onDateClick 로직을 여기에 간략히 구현
-                    if (clickedDate == null) return@MonthlyCalendarView // 이 부분은 MonthlyCalendarView 호출부에 맞게 조정
+                onDateClick = { clickedDate ->
+                    if (clickedDate == null) return@MonthlyCalendarView
                     if (clickedDate == today) {
-                        if (dateForBorderOnlyPreview == today) { // 이미 테두리만 있는 오늘을 클릭
+                        if (dateForBorderOnlyPreview == today) {
                             selectedDateForDetailsPreview = today
                             dateForBorderOnlyPreview = null
-                        } else { // 오늘 첫 클릭
+                        } else {
                             selectedDateForDetailsPreview = null
                             dateForBorderOnlyPreview = today
                         }
-                    } else { // 다른 날짜 클릭
+                    } else {
                         selectedDateForDetailsPreview = clickedDate
                         dateForBorderOnlyPreview = null
                     }
                     println("Date clicked: $clickedDate, BorderFor: $dateForBorderOnlyPreview, PopupFor: $selectedDateForDetailsPreview")
                 },
                 eventsByDate = dummyEvents,
-                selectedDateForDetails = selectedDateForDetailsPreview, // 프리뷰용 상태 전달
-                dateForBorderOnly = dateForBorderOnlyPreview,      // <<< 누락된 파라미터 전달
+                selectedDateForDetails = selectedDateForDetailsPreview,
+                dateForBorderOnly = dateForBorderOnlyPreview,
                 onEditEventRequest = { date: LocalDate, event: CalendarEvent ->
                     println("Edit event $event on $date requested")
                 },
@@ -575,14 +573,13 @@ fun MonthlyCalendarViewFullPreview() {
                 },
                 onTitleClick = { println("Month Title clicked (for view toggle)") },
                 onCalendarIconClick = { println("Calendar Icon clicked (for time picker)") },
-                onTodayHeaderButtonClick = { // HomeScreen의 onTodayHeaderButtonClick 로직 구현
+                onTodayHeaderButtonClick = {
                     currentMonthPreview = YearMonth.now()
                     selectedDateForDetailsPreview = null
                     dateForBorderOnlyPreview = LocalDate.now()
                     println("Today Header Button Clicked. BorderFor: $dateForBorderOnlyPreview, PopupFor: $selectedDateForDetailsPreview")
                 }
             )
-            // 선택 상태 확인용 텍스트 (디버깅용) - 필요하다면 추가
             Text("Selected for Details (Popup): ${selectedDateForDetailsPreview?.toString() ?: "None"}")
             Text("Border Only For (Today first click): ${dateForBorderOnlyPreview?.toString() ?: "None"}")
         }

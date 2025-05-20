@@ -54,6 +54,9 @@ android {
 }
 
 dependencies {
+
+    implementation(libs.coil.compose)
+
     // 1. Compose BOM (Bill of Materials) - Compose 라이브러리 버전 관리를 용이하게 함
     implementation(platform(libs.androidx.compose.bom)) // libs.versions.toml에 정의된 'androidx-compose-bom'
     androidTestImplementation(platform(libs.androidx.compose.bom))

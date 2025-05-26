@@ -1,9 +1,9 @@
 package com.example.daytogether.ui.home
-
+import com.example.daytogether.ui.message.MessageScreen
 import androidx.compose.foundation.layout.Arrangement
 import com.example.daytogether.ui.gallery.GalleryScreen
 import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.foundation.layout.Box // 오버레이 UI를 위해 추가
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -19,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
-// NavHostController는 rememberNavController()의 반환 타입
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -35,7 +34,6 @@ import com.example.daytogether.ui.theme.TextPrimary
 import com.example.daytogether.data.model.CalendarEvent
 import com.example.daytogether.data.model.WeeklyCalendarDay
 import com.example.daytogether.ui.home.composables.ActualHomeScreenContent
-// DateEventsBottomSheet와 AddEventInputView가 composables 패키지에 있다고 가정하고 임포트
 import com.example.daytogether.ui.home.composables.AddEventInputView
 import com.example.daytogether.ui.home.composables.DateEventsBottomSheet
 import java.time.Instant // DatePicker용
@@ -315,7 +313,7 @@ fun HomeScreen(appNavController: NavController) {
                 } // End of Box
             }
             composable(BottomNavItem.Message.route) {
-                Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) { Text("메시지 화면") }
+                MessageScreen(navController = mainNavController)
             }
             composable(BottomNavItem.Gallery.route) {
                 GalleryScreen(navController = mainNavController)

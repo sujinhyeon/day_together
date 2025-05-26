@@ -1,9 +1,9 @@
-package com.example.daytogether.ui.theme // 사용자님의 실제 패키지명
+package com.example.daytogether.ui.theme
 
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import com.example.daytogether.R // 사용자님의 R 클래스
+import com.example.daytogether.R
 
 // Gothic A1 폰트 패밀리 정의
 val GothicA1 = FontFamily(

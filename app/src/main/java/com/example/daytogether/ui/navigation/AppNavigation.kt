@@ -2,7 +2,6 @@ package com.example.daytogether.navigation
 
 import com.example.daytogether.ui.auth.EditProfileScreen
 import android.util.Log
-// import androidx.compose.material3.Text // SignUpScreen, FindAccountScreen을 실제 컴포저블로 대체하면 필요 없을 수 있음
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -10,27 +9,27 @@ import androidx.compose.runtime.remember
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.daytogether.ui.auth.FindAccountScreen // FindAccountScreen 임포트
-import com.example.daytogether.ui.auth.LoginScreen // LoginScreen 임포트
-import com.example.daytogether.ui.auth.SignUpScreen // SignUpScreen 임포트
-import com.example.daytogether.ui.home.HomeScreen // HomeScreen 임포트 (중복 제거)
+import com.example.daytogether.ui.auth.FindAccountScreen
+import com.example.daytogether.ui.auth.LoginScreen
+import com.example.daytogether.ui.auth.SignUpScreen
+import com.example.daytogether.ui.home.HomeScreen
 import com.example.daytogether.ui.onboarding.OnboardingScreen
 import com.example.daytogether.ui.splash.SplashScreen
 
-// 라우트 정의 객체
+
 object AppDestinations {
     const val SPLASH_ROUTE = "splash"
     const val ONBOARDING_ROUTE = "onboarding"
-    const val LOGIN_ROUTE = "login" // 온보딩 페이저 내 로그인 외 별도 로그인 화면 접근 시
-    const val MAIN_ROUTE = "main_graph" // 메인 화면 진입점
+    const val LOGIN_ROUTE = "login"
+    const val MAIN_ROUTE = "main_graph"
     const val SIGNUP_ROUTE = "signup"
     const val FIND_ACCOUNT_ROUTE = "find_account"
-    const val EDIT_PROFILE_ROUTE = "edit_profile" // SettingsScreen.kt에서 "개인정보" 항목을 클릭했을 때 이 EditProfileScreen으로 이동
+    const val EDIT_PROFILE_ROUTE = "edit_profile"
 }
 
 @Composable
 fun AppNavigation(
-    // userPreferencesRepository: UserPreferencesRepository // DataStore/SharedPreferences 사용 시 주입
+
 ) {
     val navController = rememberNavController()
 
@@ -40,7 +39,7 @@ fun AppNavigation(
     Log.d("AppNavigation", "isFirstLaunch 값: $isFirstLaunch")
 
     // --- UI 개발 중 임시로 메인 화면으로 바로 시작 ---
-    val startDestination = AppDestinations.MAIN_ROUTE // <--- 시작점을 메인으로 변경!
+    val startDestination = AppDestinations.MAIN_ROUTE
     Log.d("AppNavigation", "임시 UI 개발 모드: 시작 지점 = $startDestination")
     // --- 원래 로직 (주석 처리) ---
     // val isFirstLaunch by remember { mutableStateOf(true) }
@@ -56,7 +55,7 @@ fun AppNavigation(
             SplashScreen(
                 onTimeout = {
                     // --- UI 개발 중 임시 로직 ---
-                    navController.navigate(AppDestinations.MAIN_ROUTE) { // 스플래시 후 무조건 메인으로 (임시)
+                    navController.navigate(AppDestinations.MAIN_ROUTE) {
                         popUpTo(AppDestinations.SPLASH_ROUTE) { inclusive = true }
                     }
                     // --- 원래 로직 (주석 처리) ---

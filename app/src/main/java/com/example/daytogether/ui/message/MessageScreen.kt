@@ -69,11 +69,12 @@ fun MessageScreen(
     ) { innerPadding ->
         Box(modifier = modifier.padding(innerPadding).fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {
-                PinnedChatMessage()
-                ChatMessagesList(
-                    modifier = Modifier.weight(1f),
-                    messages = sampleMessages
+
+                PinnedChatbotMessageBubble()
+
+                ChatMessagesList(modifier = Modifier.weight(1f), messages = sampleMessages
                 )
+
                 MessageInputArea(
                     text = messageText,
                     onTextChanged = { messageText = it },
@@ -97,7 +98,7 @@ fun MessageScreen(
                     MessageDatePicker(
                         modifier = Modifier
                             .align(Alignment.TopCenter)
-                            .padding(top = 56.dp)
+                            .padding(top = 56.dp) // TopAppBar 높이 고려
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
                             .background(ScreenBackground)
@@ -132,6 +133,7 @@ fun MessageScreen(
     }
 }
 
+
 // --- TopBar ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -147,14 +149,18 @@ fun MessageTopBar(
     TopAppBar(
         title = { /* 제목 없음 */ },
         navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = TextPrimary,
-                    modifier = Modifier.size(26.dp)
-                )
+
+            if (!showSearchBar) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = TextPrimary,
+                        modifier = Modifier.size(26.dp)
+                    )
+                }
             }
+
         },
         actions = {
             if (showSearchBar) {
@@ -224,42 +230,65 @@ fun MessageTopBar(
 
 // --- 고정 챗봇 메시지 ---
 @Composable
-fun PinnedChatMessage() {
+fun PinnedChatbotMessageBubble() {
+    val chatbotMessage = MessageItem(
+        id = 0,
+        text = "오늘은 아빠의 생일! 오늘 뭐 할거야?",
+        time = "19:05",
+        isSentByMe = false,
+        senderName = "챗봇"
+    )
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 12.dp)
-            .background(AnniversaryBoardBackground.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-            .padding(horizontal = 12.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 4.dp),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.Bottom
     ) {
         Image(
             painter = painterResource(id = R.drawable.ic_cloud_happy),
-            contentDescription = "Chatbot Avatar",
+            contentDescription = chatbotMessage.senderName + " Avatar",
             contentScale = ContentScale.Fit,
-            modifier = Modifier.size(32.dp)
+            modifier = Modifier
+                .size(30.dp)
+                .clip(CircleShape)
         )
-        Spacer(modifier = Modifier.width(10.dp))
-        Column(modifier = Modifier.weight(1f)) {
+        Spacer(modifier = Modifier.width(8.dp))
+        Column {
             Text(
-                text = "챗봇",
-                style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary, fontFamily = GothicA1)
+                text = chatbotMessage.senderName,
+                style = TextStyle(fontSize = 12.sp, color = TextPrimary, fontWeight = FontWeight.Medium, fontFamily = GothicA1),
+                modifier = Modifier.padding(start = 8.dp, bottom = 2.dp)
             )
-            Text(
-                text = "오늘은 아빠의 생일! 오늘 뭐 할거야?",
-                color = TextPrimary,
-                style = TextStyle(fontSize = 14.sp, fontFamily = GothicA1),
-                modifier = Modifier.wrapContentHeight(align = Alignment.CenterVertically)
-            )
+            Box(
+                modifier = Modifier
+                    .background(
+                        color = AnniversaryBoardBackground.copy(alpha = 0.7f),
+                        shape = RoundedCornerShape(
+                            topStart = 4.dp,
+                            topEnd = 16.dp,
+                            bottomStart = 16.dp,
+                            bottomEnd = 16.dp
+                        )
+                    )
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .widthIn(max = LocalConfiguration.current.screenWidthDp.dp * 0.7f)
+            ) {
+                Text(
+                    text = chatbotMessage.text,
+                    style = TextStyle(fontSize = 14.sp, color = TextPrimary, fontFamily = GothicA1)
+                )
+            }
         }
+
         Text(
-            text = "19:05",
-            color = TextPrimary.copy(alpha = 0.7f),
-            style = TextStyle(fontSize = 11.sp, fontFamily = GothicA1),
+            text = chatbotMessage.time,
+            style = TextStyle(fontSize = 10.sp, color = TextPrimary.copy(alpha = 0.7f), fontFamily = GothicA1),
+            modifier = Modifier.padding(start = 6.dp)
         )
     }
 }
-
 // --- 채팅 메시지 데이터 클래스 및 샘플 ---
 data class MessageItem(val id: Int, val text: String, val time: String, val isSentByMe: Boolean, val senderName: String = "사용자")
 
@@ -276,9 +305,9 @@ fun ChatMessagesList(modifier: Modifier = Modifier, messages: List<MessageItem>)
     LazyColumn(
         modifier = modifier.padding(horizontal = 16.dp),
         reverseLayout = true,
-        contentPadding = PaddingValues(vertical = 8.dp)
+        contentPadding = PaddingValues(top = 0.dp, bottom = 8.dp)
     ) {
-        items(messages.reversed()) { message ->
+        items(messages.reversed(), key = { it.id }) { message ->
             ChatMessageBubble(message)
             Spacer(modifier = Modifier.height(10.dp))
         }
@@ -364,7 +393,7 @@ fun MessageInputArea(
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically // 아이콘과 TextField 정렬을 위해 CenterVertically 유지 또는 필요시 Alignment.Bottom 등으로 조절
         ) {
             IconButton(onClick = onClipClick) {
                 Icon(
@@ -377,7 +406,11 @@ fun MessageInputArea(
             OutlinedTextField(
                 value = text,
                 onValueChange = onTextChanged,
-                modifier = Modifier.weight(1f).heightIn(min = 48.dp, max = 120.dp),
+                modifier = Modifier
+                    .weight(1f)
+
+                    .heightIn(min = 32.dp, max = 64.dp),
+                maxLines = 2,
                 placeholder = { Text("메시지 입력", style = TextStyle(fontSize = 14.sp, color = NavIconUnselected, fontFamily = GothicA1)) },
                 shape = RoundedCornerShape(24.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -385,16 +418,12 @@ fun MessageInputArea(
                     unfocusedContainerColor = Brown100.copy(alpha = 0.5f),
                     disabledContainerColor = Brown100.copy(alpha = 0.3f),
                     errorContainerColor = Brown100.copy(alpha = 0.5f),
-
                     focusedBorderColor = TextPrimary,
                     unfocusedBorderColor = Color.Transparent,
-
                     focusedTextColor = TextPrimary,
                     unfocusedTextColor = TextPrimary,
                     disabledTextColor = TextPrimary.copy(alpha = 0.5f),
-
                     cursorColor = TextPrimary,
-
                 ),
                 textStyle = TextStyle(fontSize = 14.sp, color = TextPrimary, fontFamily = GothicA1)
             )
@@ -410,7 +439,6 @@ fun MessageInputArea(
         }
     }
 }
-
 // --- 첨부파일 옵션 패널 ---
 @Composable
 fun AttachmentOptionsPanel(

@@ -1,29 +1,73 @@
 package com.example.daytogether.ui.gallery
 
-
-import java.util.UUID
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -37,17 +81,19 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.daytogether.R
-import com.example.daytogether.ui.theme.*
-import java.time.Instant
+import com.example.daytogether.ui.theme.ButtonActiveBackground
+import com.example.daytogether.ui.theme.DaytogetherTheme
+import com.example.daytogether.ui.theme.ScreenBackground
+import com.example.daytogether.ui.theme.TextPrimary
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import java.util.UUID
 
-data class PhotoItem(val id: String, val imageUrl: String, val date: String) // date는 "YYYY-MM-DD" 형식이어야 YearMonth.parse가 정확히 동작합니다.
+data class PhotoItem(val id: String, val imageUrl: String, val date: String)
 data class MonthlyPhotoGroupData(val yearMonth: YearMonth, val photos: List<PhotoItem>)
-data class MonthlyComment(val id: String = UUID.randomUUID().toString(), val author: String, val text: String, val timestamp: String) // ID 추가
+data class MonthlyComment(val id: String = UUID.randomUUID().toString(), val author: String, val text: String, val timestamp: String)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -56,41 +102,49 @@ fun GalleryScreen(navController: NavController) {
     val yearMonthFormatter = DateTimeFormatter.ofPattern("yyyy년 MM월", Locale.KOREAN)
     var showCommentBottomSheetFor by remember { mutableStateOf<YearMonth?>(null) }
     var showYearMonthPickerDialog by remember { mutableStateOf(false) }
+    val lazyListState = rememberLazyListState()
 
-    // 샘플 데이터 (날짜 형식을 YYYY-MM-DD로 가정, 실제 데이터 구조에 맞게 파싱 필요)
     val samplePhotos = listOf(
-        PhotoItem("1", "https://picsum.photos/seed/picsum/200/300", "${YearMonth.now().atDay(1)}"),
-        PhotoItem("2", "https://picsum.photos/seed/kotlin/200/300", "${YearMonth.now().atDay(3)}"),
-        PhotoItem("3", "https://picsum.photos/seed/compose/200/300", "${YearMonth.now().atDay(5)}"),
-        PhotoItem("4", "https://picsum.photos/seed/android/200/300", "${YearMonth.now().minusMonths(1).atDay(10)}"),
-        PhotoItem("5", "https://picsum.photos/seed/google/200/300", "${YearMonth.now().minusMonths(1).atDay(12)}"),
-        PhotoItem("6", "https://picsum.photos/seed/jetpack/200/300", "${YearMonth.now().minusMonths(2).atDay(15)}"),
-        PhotoItem("7", "https://picsum.photos/seed/flower/200/300", "${YearMonth.now().minusMonths(2).atDay(20)}"),
+        PhotoItem("s1", "https://picsum.photos/seed/202401/200/300", YearMonth.of(2024, 1).atDay(10).toString()),
+        PhotoItem("s2", "https://picsum.photos/seed/202403/200/300", YearMonth.of(2024, 3).atDay(5).toString()),
+        PhotoItem("s3", "https://picsum.photos/seed/current_prev/200/300", YearMonth.now().minusMonths(1).atDay(15).toString()),
+        PhotoItem("s4", "https://picsum.photos/seed/current/200/300", YearMonth.now().atDay(1).toString()),
+        PhotoItem("s5", "https://picsum.photos/seed/current_plus1/200/300", YearMonth.now().plusMonths(1).atDay(20).toString()),
+        PhotoItem("s6", "https://picsum.photos/seed/current_plus2/200/300", YearMonth.now().plusMonths(2).atDay(10).toString()),
+        PhotoItem("s7", "https://picsum.photos/seed/202512/200/300", YearMonth.of(2025,12).atDay(25).toString())
     )
 
-    val monthlyPhotoGroups = remember(currentDisplayYearMonth, samplePhotos) {
-        samplePhotos
-            .filter { YearMonth.from(LocalDate.parse(it.date)) == currentDisplayYearMonth } // LocalDate로 파싱 후 YearMonth 추출
-            .groupBy { YearMonth.from(LocalDate.parse(it.date)) }
-            .map { MonthlyPhotoGroupData(it.key, it.value) }
-            .sortedByDescending { it.yearMonth } // 최신순 정렬
+    val allMonthlyPhotoGroups = remember(samplePhotos, currentDisplayYearMonth) {
+        val photosByYearMonth = samplePhotos.groupBy { YearMonth.from(LocalDate.parse(it.date)) }
+        val distinctYearMonthsInPhotos = photosByYearMonth.keys
+
+        val allDisplayableYearMonths = (distinctYearMonthsInPhotos + currentDisplayYearMonth)
+            .distinct()
+            .sorted()
+
+        allDisplayableYearMonths.map { ym ->
+            MonthlyPhotoGroupData(
+                yearMonth = ym,
+                photos = photosByYearMonth[ym]?.sortedBy { photo -> LocalDate.parse(photo.date) } ?: emptyList()
+            )
+        }
+    }
+
+    LaunchedEffect(currentDisplayYearMonth, allMonthlyPhotoGroups) {
+        if (allMonthlyPhotoGroups.isNotEmpty()) {
+            val indexToScroll = allMonthlyPhotoGroups.indexOfFirst { it.yearMonth == currentDisplayYearMonth }
+            if (indexToScroll != -1) {
+                lazyListState.animateScrollToItem(indexToScroll)
+            }
+        }
     }
 
     DaytogetherTheme {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = {
-                        Text(
-                            text = currentDisplayYearMonth.format(yearMonthFormatter),
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = TextPrimary
-                            )
-                        )
-                    },
+                    title = { },
                     actions = {
-                        // 요청사항 3: 오른쪽 달력 아이콘 클릭 시 DatePickerDialog 표시
                         IconButton(onClick = { showYearMonthPickerDialog = true }) {
                             Icon(
                                 imageVector = Icons.Filled.CalendarMonth,
@@ -106,7 +160,7 @@ fun GalleryScreen(navController: NavController) {
                 )
             }
         ) { innerPadding ->
-            if (monthlyPhotoGroups.isEmpty()) {
+            if (samplePhotos.isEmpty()) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -115,63 +169,49 @@ fun GalleryScreen(navController: NavController) {
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        "이 달에는 공유된 사진이 없어요.",
+                        "공유된 사진이 아직 없어요.",
                         style = MaterialTheme.typography.bodyLarge,
                         color = TextPrimary.copy(alpha = 0.7f)
                     )
                 }
             } else {
                 LazyColumn(
+                    state = lazyListState,
                     modifier = Modifier
                         .fillMaxSize()
                         .background(ScreenBackground)
                         .padding(innerPadding)
                         .padding(horizontal = 8.dp)
                 ) {
-                    items(monthlyPhotoGroups.size) { index ->
-                        val group = monthlyPhotoGroups[index]
-                        // 요청사항 1 & 2: 실제 MonthlyPhotoGroupItem 사용 (임시 텍스트 삭제, 아이콘 위치 변경은 MonthlyPhotoGroupItem 내부에서)
+                    items(
+                        items = allMonthlyPhotoGroups,
+                        key = { it.yearMonth.toString() }
+                    ) { group ->
                         MonthlyPhotoGroupItem(
                             yearMonth = group.yearMonth,
                             photos = group.photos,
                             yearMonthFormatter = yearMonthFormatter,
-                            onPhotoClick = { photoId -> /* TODO: 사진 클릭 시 상세 화면 등으로 이동 */ },
+                            onPhotoClick = { },
                             onCommentIconClick = { yearMonth -> showCommentBottomSheetFor = yearMonth }
                         )
-
-                        if (index < monthlyPhotoGroups.lastIndex) {
-                            Spacer(modifier = Modifier.height(16.dp))
-                        }
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             }
 
-            // 요청사항 3: DatePickerDialog 표시 로직
             if (showYearMonthPickerDialog) {
-                val datePickerState = rememberDatePickerState(
-                    initialSelectedDateMillis = currentDisplayYearMonth.atDay(1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-                )
-                DatePickerDialog(
-                    onDismissRequest = { showYearMonthPickerDialog = false },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            datePickerState.selectedDateMillis?.let { millis ->
-                                val selectedLocalDate = Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate()
-                                currentDisplayYearMonth = YearMonth.from(selectedLocalDate)
-                            }
-                            showYearMonthPickerDialog = false
-                        }) {
-                            Text("확인")
-                        }
+                WheelCustomYearMonthPickerDialog(
+                    initialYearMonth = currentDisplayYearMonth,
+                    onDismissRequest = {
+                        val finalSelection = WheelCustomYearMonthPickerDialogDefaults.getSelection()
+                        currentDisplayYearMonth = finalSelection
+                        showYearMonthPickerDialog = false
                     },
-                    dismissButton = {
-                        TextButton(onClick = { showYearMonthPickerDialog = false }) {
-                            Text("취소")
-                        }
+                    onConfirm = { selectedYearMonth ->
+                        currentDisplayYearMonth = selectedYearMonth
+                        showYearMonthPickerDialog = false
                     }
-                ) {
-                    DatePicker(state = datePickerState)
-                }
+                )
             }
 
             showCommentBottomSheetFor?.let { ym ->
@@ -186,13 +226,183 @@ fun GalleryScreen(navController: NavController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+fun WheelCustomYearMonthPickerDialog(
+    initialYearMonth: YearMonth,
+    onDismissRequest: () -> Unit,
+    onConfirm: (YearMonth) -> Unit,
+    yearRange: IntRange = (1900..2100)
+) {
+    val density = LocalDensity.current
+    val itemHeightDp = 40.dp
+    val itemHeightPx = density.run { itemHeightDp.toPx() }
+    val threshold = remember { itemHeightPx / 2f }
+
+    val yearListState = rememberLazyListState()
+    val monthListState = rememberLazyListState()
+
+    var userHasInteracted by remember { mutableStateOf(false) }
+
+    val internalSelectedYear by remember {
+        derivedStateOf {
+            if (yearListState.layoutInfo.visibleItemsInfo.isEmpty()) {
+                initialYearMonth.year
+            } else {
+                val firstVisibleYearIndex = yearListState.firstVisibleItemIndex
+                val scrollOffset = yearListState.firstVisibleItemScrollOffset
+                yearRange.first + firstVisibleYearIndex + if (scrollOffset >= threshold) 1 else 0
+            }
+        }
+    }
+
+    val internalSelectedMonthValue by remember {
+        derivedStateOf {
+            if (monthListState.layoutInfo.visibleItemsInfo.isEmpty()) {
+                initialYearMonth.monthValue
+            } else {
+                val firstVisibleMonthIndex = monthListState.firstVisibleItemIndex
+                val scrollOffset = monthListState.firstVisibleItemScrollOffset
+                firstVisibleMonthIndex + (if (scrollOffset >= threshold) 1 else 0) + 1
+            }
+        }
+    }
+
+    WheelCustomYearMonthPickerDialogDefaults.selectedYear = internalSelectedYear
+    WheelCustomYearMonthPickerDialogDefaults.selectedMonthValue = internalSelectedMonthValue
+
+    LaunchedEffect(initialYearMonth, yearListState.layoutInfo.totalItemsCount, monthListState.layoutInfo.totalItemsCount) {
+        if (!userHasInteracted) {
+            if (yearListState.layoutInfo.totalItemsCount > 0) {
+                val targetYearIndex = (initialYearMonth.year - yearRange.first).coerceIn(0, yearRange.count() - 1)
+                yearListState.scrollToItem(targetYearIndex)
+            }
+            if (monthListState.layoutInfo.totalItemsCount > 0) {
+                val targetMonthIndex = (initialYearMonth.monthValue - 1).coerceIn(0, 11)
+                monthListState.scrollToItem(targetMonthIndex)
+            }
+        }
+    }
+
+    AlertDialog(
+        onDismissRequest = {
+            val currentFinalSelection = YearMonth.of(internalSelectedYear, internalSelectedMonthValue)
+            onConfirm(currentFinalSelection)
+            onDismissRequest()
+        },
+        title = null,
+        text = {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = {}
+                    )
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(0.85f),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    LazyColumn(
+                        state = yearListState,
+                        contentPadding = PaddingValues(vertical = 80.dp),
+                        flingBehavior = rememberSnapFlingBehavior(yearListState),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(200.dp)
+                            .pointerInput(Unit) {
+                                awaitPointerEventScope {
+                                    awaitFirstDown(requireUnconsumed = false)
+                                    userHasInteracted = true
+                                }
+                            }
+                    ) {
+                        items(yearRange.count()) { index ->
+                            val year = yearRange.first + index
+                            val textColor by animateColorAsState(
+                                targetValue = if (year == internalSelectedYear) MaterialTheme.colorScheme.onSurface else Color.Gray,
+                                label = "yearTextColorPickerDialog"
+                            )
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(itemHeightDp)
+                            ) {
+                                BasicText(
+                                    text = "${year}년",
+                                    style = LocalTextStyle.current.copy(
+                                        fontSize = 21.sp,
+                                        fontWeight = if (year == internalSelectedYear) FontWeight.Bold else FontWeight.Normal,
+                                        color = textColor
+                                    )
+                                )
+                            }
+                        }
+                    }
+
+                    LazyColumn(
+                        state = monthListState,
+                        contentPadding = PaddingValues(vertical = 80.dp),
+                        flingBehavior = rememberSnapFlingBehavior(monthListState),
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(200.dp)
+                            .pointerInput(Unit) {
+                                awaitPointerEventScope {
+                                    awaitFirstDown(requireUnconsumed = false)
+                                    userHasInteracted = true
+                                }
+                            }
+                    ) {
+                        items(12) { index ->
+                            val month = index + 1
+                            val textColor by animateColorAsState(
+                                targetValue = if (month == internalSelectedMonthValue) MaterialTheme.colorScheme.onSurface else Color.Gray,
+                                label = "monthTextColorPickerDialog"
+                            )
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(itemHeightDp)
+                            ) {
+                                BasicText(
+                                    text = "${month}월",
+                                    style = LocalTextStyle.current.copy(
+                                        fontSize = 21.sp,
+                                        fontWeight = if (month == internalSelectedMonthValue) FontWeight.Bold else FontWeight.Normal,
+                                        color = textColor
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {}
+    )
+}
+
+internal object WheelCustomYearMonthPickerDialogDefaults {
+    var selectedYear: Int = YearMonth.now().year
+    var selectedMonthValue: Int = YearMonth.now().monthValue
+
+    fun getSelection(): YearMonth = YearMonth.of(selectedYear, selectedMonthValue)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun MonthlyCommentBottomSheet(
     yearMonth: YearMonth,
     onDismiss: () -> Unit
 ) {
-    // 요청사항 4: 메시지 입력 시 반영되도록 comments를 mutableStateListOf로 변경
-    val comments = remember(yearMonth) { // yearMonth가 바뀌면 댓글 목록 초기화 (실제로는 ViewModel 필요)
-        mutableStateListOf( // mutableStateListOf로 변경
+    val comments = remember(yearMonth) {
+        mutableStateListOf(
             MonthlyComment(author = "가족1", text = "${yearMonth.monthValue}월 정말 즐거웠어요!", timestamp = "2시간 전"),
             MonthlyComment(author = "가족2", text = "사진 잘 나왔네!", timestamp = "1시간 전")
         )
@@ -208,8 +418,8 @@ fun MonthlyCommentBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 20.dp) // 바닥 패딩을 조금 줄여서 키보드에 덜 가려지도록
-                .imePadding() // 키보드가 올라올 때 UI를 밀어올림
+                .padding(horizontal = 16.dp, vertical = 20.dp)
+                .imePadding()
         ) {
             Text(
                 text = "${yearMonth.format(DateTimeFormatter.ofPattern("yyyy년 MM월", Locale.KOREAN))}의 한마디",
@@ -228,14 +438,14 @@ fun MonthlyCommentBottomSheet(
             } else {
                 LazyColumn(
                     modifier = Modifier
-                        .weight(1f, fill = false) // 내용이 적을 때 너무 커지지 않도록
-                        .heightIn(max = 200.dp) // 최대 높이 제한
+                        .weight(1f, fill = false)
+                        .heightIn(max = 200.dp)
                 ) {
-                    items(comments.size, key = { comments[it].id }) { index -> // key 추가
+                    items(comments.size, key = { comments[it].id }) { index ->
                         val comment = comments[index]
                         Column(modifier = Modifier.padding(vertical = 8.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(comment.author, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold, color = TextPrimary))
+                                Text(comment.author, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium, color = TextPrimary))
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(comment.timestamp, style = MaterialTheme.typography.labelSmall, color = TextPrimary.copy(alpha = 0.6f))
                             }
@@ -259,35 +469,32 @@ fun MonthlyCommentBottomSheet(
                     onValueChange = { newCommentText = it },
                     placeholder = {
                         Text(
-                            "이번 달 우리 가족에게 남기는 한마디", // 플레이스홀더 간결하게
-                            fontSize = 13.sp, // 기존 유지
+                            "이번 달 우리 가족에게 남기는 한마디",
+                            fontSize = 13.sp,
                             color = TextPrimary.copy(alpha = 0.6f),
-                            maxLines = 1, // 플레이스홀더도 한 줄로
+                            maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(20.dp),
                     textStyle = MaterialTheme.typography.bodyMedium.copy(color = TextPrimary),
-                    // 요청사항 5: 입력칸 한 줄 유지, 내용 길어지면 가로 스크롤
-                    singleLine = true, // 한 줄 입력 필드로 만듦 (자동으로 가로 스크롤 지원)
+                    singleLine = true,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
                     keyboardActions = KeyboardActions(onSend = {
                         if (newCommentText.isNotBlank()) {
-                            // 요청사항 4: 새 댓글 추가 로직
-                            comments.add(0, MonthlyComment(author = "나", text = newCommentText, timestamp = "방금 전")) // 맨 위에 추가
+                            comments.add(0, MonthlyComment(author = "나", text = newCommentText, timestamp = "방금 전"))
                             newCommentText = ""
-                            // TODO: 실제로는 ViewModel을 통해 서버/DB에 저장 후 목록 갱신
                         }
                     }),
-                    colors = TextFieldDefaults.colors( // Material 3 스타일
+                    colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
                         disabledContainerColor = Color.Transparent,
-                        focusedIndicatorColor = ButtonActiveBackground, // 테마 색상 활용
+                        focusedIndicatorColor = ButtonActiveBackground,
                         unfocusedIndicatorColor = TextPrimary.copy(alpha = 0.3f),
                         focusedLabelColor = TextPrimary,
-                        cursorColor = ButtonActiveBackground, // 테마 색상 활용
+                        cursorColor = ButtonActiveBackground,
                         focusedTextColor = TextPrimary,
                         unfocusedTextColor = TextPrimary.copy(alpha = 0.8f)
                     )
@@ -296,10 +503,8 @@ fun MonthlyCommentBottomSheet(
                 IconButton(
                     onClick = {
                         if (newCommentText.isNotBlank()) {
-                            // 요청사항 4: 새 댓글 추가 로직
-                            comments.add(0, MonthlyComment(author = "나", text = newCommentText, timestamp = "방금 전")) // 맨 위에 추가
+                            comments.add(0, MonthlyComment(author = "나", text = newCommentText, timestamp = "방금 전"))
                             newCommentText = ""
-                            // TODO: 실제로는 ViewModel을 통해 서버/DB에 저장 후 목록 갱신
                         }
                     },
                     enabled = newCommentText.isNotBlank()
@@ -329,8 +534,8 @@ fun PhotoGridItem(photoItem: PhotoItem, onClick: () -> Unit) {
             model = ImageRequest.Builder(LocalContext.current)
                 .data(photoItem.imageUrl)
                 .crossfade(true)
-                .error(R.drawable.ic_placeholder_image) // drawable에 대체 이미지 필요
-                .placeholder(R.drawable.ic_placeholder_image) // 로딩 중 표시할 이미지
+                .error(R.drawable.ic_placeholder_image)
+                .placeholder(R.drawable.ic_placeholder_image)
                 .build(),
             contentDescription = "갤러리 사진 ${photoItem.id}",
             contentScale = ContentScale.Crop,
@@ -348,30 +553,39 @@ fun MonthlyPhotoGroupItem(
     onCommentIconClick: (yearMonth: YearMonth) -> Unit
 ) {
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
-        // 요청사항 1: 채팅 아이콘을 "0000년 00월" 텍스트 오른쪽으로 이동
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 8.dp, start = 8.dp, end = 4.dp), // 아이콘 버튼 패딩 고려 end 4.dp
+                .padding(bottom = 8.dp, start = 8.dp, end = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                // 요청사항 1: "(N장)" 텍스트 표시 (사진 개수)
-                text = "${yearMonth.format(yearMonthFormatter)} (${photos.size}장)",
+                text = yearMonth.format(yearMonthFormatter),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = TextPrimary),
-                modifier = Modifier.weight(1f) // 텍스트가 남은 공간 차지
+                modifier = Modifier.weight(1f)
             )
-            // Spacer(modifier = Modifier.weight(1f)) // 텍스트와 아이콘 사이 공간 채우기 (텍스트를 왼쪽, 아이콘을 오른쪽에 붙임)
-            IconButton(onClick = { onCommentIconClick(yearMonth) }, modifier = Modifier.size(36.dp)) { // 아이콘 버튼 크기 약간 조절
+            IconButton(onClick = { onCommentIconClick(yearMonth) }, modifier = Modifier.size(36.dp)) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.Chat,
                     contentDescription = "${yearMonth.format(yearMonthFormatter)} 댓글 보기",
                     tint = TextPrimary,
-                    modifier = Modifier.size(20.dp) // 아이콘 자체 크기 약간 조절
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }
-        PhotoGrid(photos = photos, onPhotoClick = onPhotoClick)
+        if (photos.isEmpty()) {
+            Text(
+                text = "해당 월에는 사진이 존재하지 않습니다.",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyMedium,
+                color = TextPrimary.copy(alpha = 0.7f)
+            )
+        } else {
+            PhotoGrid(photos = photos, onPhotoClick = onPhotoClick)
+        }
     }
 }
 
@@ -382,12 +596,8 @@ fun PhotoGrid(photos: List<PhotoItem>, onPhotoClick: (photoId: String) -> Unit) 
         columns = GridCells.Fixed(3),
         modifier = Modifier
             .fillMaxWidth()
-            // 사진 개수에 따라 높이가 유동적으로 변하도록 heightIn 제거 또는 최대 높이만 설정
-            // 또는 각 행의 높이를 고정값으로 계산. 예: 130.dp는 한 행의 높이
-            .height(((photos.size + 2) / 3 * 130).dp) // 행 수 * 행 높이 (패딩/간격 고려하여 조절 필요)
-            // .heightIn(min = 130.dp) // 최소 한 줄 높이
-            .padding(horizontal = 4.dp), // Grid 전체의 좌우 패딩
-        contentPadding = PaddingValues(0.dp), // 아이템 간 간격은 Arrangement로 조절
+            .height(((photos.size + 2) / 3 * 130).dp),
+        contentPadding = PaddingValues(0.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
@@ -396,8 +606,6 @@ fun PhotoGrid(photos: List<PhotoItem>, onPhotoClick: (photoId: String) -> Unit) 
         }
     }
 }
-
-
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
@@ -411,18 +619,29 @@ fun GalleryScreenPreview() {
 @Composable
 fun MonthlyPhotoGroupItemPreview() {
     DaytogetherTheme {
-        val samplePhotos = listOf(
+        val samplePhotosWithData = listOf(
             PhotoItem("1", "https://picsum.photos/200", "2025-05-01"),
-            PhotoItem("2", "https://picsum.photos/201", "2025-05-03"),
-            PhotoItem("3", "https://picsum.photos/202", "2025-05-05")
+            PhotoItem("2", "https://picsum.photos/201", "2025-05-03")
         )
-        MonthlyPhotoGroupItem(
-            yearMonth = YearMonth.of(2025, 5),
-            photos = samplePhotos,
-            yearMonthFormatter = DateTimeFormatter.ofPattern("yyyy년 MM월", Locale.KOREAN),
-            onPhotoClick = {},
-            onCommentIconClick = {}
-        )
+        val samplePhotosEmpty = emptyList<PhotoItem>()
+
+        Column {
+            MonthlyPhotoGroupItem(
+                yearMonth = YearMonth.of(2025, 5),
+                photos = samplePhotosWithData,
+                yearMonthFormatter = DateTimeFormatter.ofPattern("yyyy년 MM월", Locale.KOREAN),
+                onPhotoClick = {},
+                onCommentIconClick = {}
+            )
+            Spacer(Modifier.height(20.dp))
+            MonthlyPhotoGroupItem(
+                yearMonth = YearMonth.of(2025, 6),
+                photos = samplePhotosEmpty,
+                yearMonthFormatter = DateTimeFormatter.ofPattern("yyyy년 MM월", Locale.KOREAN),
+                onPhotoClick = {},
+                onCommentIconClick = {}
+            )
+        }
     }
 }
 
@@ -433,6 +652,20 @@ fun MonthlyCommentBottomSheetPreview() {
         Column(modifier = Modifier.fillMaxSize()) {
             Spacer(modifier = Modifier.weight(1f))
             MonthlyCommentBottomSheet(yearMonth = YearMonth.now(), onDismiss = {})
+        }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 360, heightDp = 400)
+@Composable
+fun WheelCustomYearMonthPickerDialogPreview() {
+    DaytogetherTheme {
+        Surface {
+            WheelCustomYearMonthPickerDialog(
+                initialYearMonth = YearMonth.of(2025, 5),
+                onDismissRequest = { },
+                onConfirm = { }
+            )
         }
     }
 }

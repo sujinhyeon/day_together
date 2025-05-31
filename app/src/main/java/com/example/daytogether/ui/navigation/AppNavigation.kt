@@ -1,6 +1,5 @@
 package com.example.daytogether.navigation
 
-import com.example.daytogether.ui.auth.EditProfileScreen
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue

@@ -34,8 +34,10 @@ import com.example.daytogether.ui.theme.*
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import com.example.daytogether.ui.navigation.BottomNavItem
+import java.time.LocalDate
 
-// --- MessageScreen: 메인 컴포저블 ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessageScreen(
@@ -50,8 +52,26 @@ fun MessageScreen(
 
     val currentCalendar = Calendar.getInstance()
     var selectedYear by remember { mutableStateOf(currentCalendar.get(Calendar.YEAR)) }
-    var selectedMonth by remember { mutableStateOf(currentCalendar.get(Calendar.MONTH)) } // 0-11
-    var selectedDate by remember { mutableStateOf<Int?>(null) }
+    var selectedMonth by remember { mutableStateOf(currentCalendar.get(Calendar.MONTH)) }
+    var selectedDisplayDate by remember { mutableStateOf<Int?>(null) }
+
+    val datesWithConversationsForPicker = remember(selectedYear, selectedMonth) {
+        val monthAdjusted = selectedMonth + 1
+        if (selectedYear == 2025 && monthAdjusted == 6) {
+            setOf(
+                LocalDate.of(2025, 6, 3),
+                LocalDate.of(2025, 6, 9),
+                LocalDate.of(2025, 6, 15),
+                LocalDate.of(2025, 6, 21),
+                LocalDate.of(2025, 6, 27)
+            )
+        } else if (selectedYear == LocalDate.now().year && monthAdjusted == LocalDate.now().monthValue) {
+            setOf(LocalDate.now().minusDays(2), LocalDate.now().minusDays(5))
+        }
+        else {
+            emptySet()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -60,9 +80,19 @@ fun MessageScreen(
                 searchText = searchText,
                 onSearchTextChanged = { searchText = it },
                 onToggleSearchBar = { showSearchBar = !showSearchBar; if(showSearchBar) showDatePicker = false },
-                onBack = { navController.popBackStack() },
+                onBack = {
+                    navController.navigate(BottomNavItem.Home.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
                 onCalendarClick = { showDatePicker = !showDatePicker; if(showDatePicker) showSearchBar = false },
-                onMoreOptionsClick = { /* TODO: 더보기 메뉴 로직 */ }
+                onMoreOptionsClick = {
+                    navController.navigate("chat_info_screen_route")
+                }
             )
         },
         containerColor = ScreenBackground
@@ -81,7 +111,6 @@ fun MessageScreen(
                     onClipClick = { showAttachmentOptions = !showAttachmentOptions },
                     onSendClick = {
                         if (messageText.isNotBlank()) {
-                            // TODO: 메시지 전송 로직
                             messageText = ""
                         }
                     }
@@ -93,26 +122,32 @@ fun MessageScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(Color.Black.copy(alpha = 0.3f))
-                        .clickable { showDatePicker = false }
+                        .clickable(onClick = { showDatePicker = false }, enabled = true)
+
                 ) {
                     MessageDatePicker(
                         modifier = Modifier
                             .align(Alignment.TopCenter)
-                            .padding(top = 56.dp) // TopAppBar 높이 고려
+                            .padding(top = 56.dp)
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
                             .background(ScreenBackground)
-                            .padding(16.dp),
+                            .padding(16.dp)
+                            .clickable(enabled = true) {},
                         currentYear = selectedYear,
                         currentMonth = selectedMonth,
-                        selectedDate = selectedDate,
+                        selectedDate = selectedDisplayDate,
+                        datesWithConversations = datesWithConversationsForPicker,
                         onDateSelected = { year, month, day ->
-                            selectedDate = day
+                            val actualSelectedDate = LocalDate.of(year, month + 1, day)
+                            selectedDisplayDate = day
                             showDatePicker = false
+                            println("선택된 날짜 (MessageScreen): $actualSelectedDate. 이 날짜의 메시지 로드 로직 필요.")
                         },
                         onMonthChange = { year, month ->
                             selectedYear = year
                             selectedMonth = month
+                            selectedDisplayDate = null
                         },
                         onDismiss = { showDatePicker = false }
                     )
@@ -120,21 +155,34 @@ fun MessageScreen(
             }
 
             if (showAttachmentOptions) {
-                AttachmentOptionsPanel(
-                    modifier = Modifier.align(Alignment.BottomCenter),
-                    onDismiss = { showAttachmentOptions = false },
-                    onAlbumClick = { /* TODO: 앨범 */ },
-                    onCameraClick = { /* TODO: 카메라 */ },
-                    onFileClick = { /* TODO: 파일 */ },
-                    onVoiceMessageClick = { /* TODO: 음성메시지 */ }
-                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.3f))
+                        .clickable { showAttachmentOptions = false }
+                ) {
+                    AttachmentOptionsPanel(
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                        onDismiss = { showAttachmentOptions = false },
+                        onAlbumClick = {
+                            showAttachmentOptions = false
+                        },
+                        onCameraClick = {
+                            showAttachmentOptions = false
+                        },
+                        onFileClick = {
+                            showAttachmentOptions = false
+                        },
+                        onVoiceMessageClick = {
+                            showAttachmentOptions = false
+                        }
+                    )
+                }
             }
         }
     }
 }
 
-
-// --- TopBar ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessageTopBar(
@@ -149,7 +197,6 @@ fun MessageTopBar(
     TopAppBar(
         title = { /* 제목 없음 */ },
         navigationIcon = {
-
             if (!showSearchBar) {
                 IconButton(onClick = onBack) {
                     Icon(
@@ -160,7 +207,6 @@ fun MessageTopBar(
                     )
                 }
             }
-
         },
         actions = {
             if (showSearchBar) {
@@ -178,14 +224,11 @@ fun MessageTopBar(
                         unfocusedContainerColor = ScreenBackground.copy(alpha = 0.5f),
                         disabledContainerColor = ScreenBackground.copy(alpha = 0.3f),
                         errorContainerColor = ScreenBackground.copy(alpha = 0.5f),
-
                         focusedBorderColor  = TextPrimary,
                         unfocusedBorderColor= NavIconUnselected,
-
                         focusedTextColor = TextPrimary,
                         unfocusedTextColor = TextPrimary,
                         disabledTextColor = TextPrimary.copy(alpha = 0.5f),
-
                         cursorColor = TextPrimary
                     ),
                     textStyle = TextStyle(fontSize = 14.sp, color = TextPrimary, fontFamily = GothicA1),
@@ -193,7 +236,6 @@ fun MessageTopBar(
                 )
                 TextButton(onClick = {
                     onToggleSearchBar()
-                    // TODO: 검색 실행 로직
                 }) {
                     Text("확인", color = TextPrimary, style = TextStyle(fontSize = 14.sp, fontFamily = GothicA1, fontWeight = FontWeight.Medium))
                 }
@@ -228,7 +270,6 @@ fun MessageTopBar(
     )
 }
 
-// --- 고정 챗봇 메시지 ---
 @Composable
 fun PinnedChatbotMessageBubble() {
     val chatbotMessage = MessageItem(
@@ -281,7 +322,6 @@ fun PinnedChatbotMessageBubble() {
                 )
             }
         }
-
         Text(
             text = chatbotMessage.time,
             style = TextStyle(fontSize = 10.sp, color = TextPrimary.copy(alpha = 0.7f), fontFamily = GothicA1),
@@ -289,7 +329,7 @@ fun PinnedChatbotMessageBubble() {
         )
     }
 }
-// --- 채팅 메시지 데이터 클래스 및 샘플 ---
+
 data class MessageItem(val id: Int, val text: String, val time: String, val isSentByMe: Boolean, val senderName: String = "사용자")
 
 val sampleMessages = listOf(
@@ -299,7 +339,6 @@ val sampleMessages = listOf(
     MessageItem(4, "케이크도 사갈까?", "20:05", true)
 )
 
-// --- 채팅 메시지 목록 ---
 @Composable
 fun ChatMessagesList(modifier: Modifier = Modifier, messages: List<MessageItem>) {
     LazyColumn(
@@ -314,7 +353,6 @@ fun ChatMessagesList(modifier: Modifier = Modifier, messages: List<MessageItem>)
     }
 }
 
-// --- 개별 채팅 버블 ---
 @Composable
 fun ChatMessageBubble(message: MessageItem) {
     val horizontalAlignment = if (message.isSentByMe) Alignment.End else Alignment.Start
@@ -376,8 +414,6 @@ fun ChatMessageBubble(message: MessageItem) {
     }
 }
 
-
-// --- 메시지 입력창 ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessageInputArea(
@@ -392,8 +428,8 @@ fun MessageInputArea(
         shadowElevation = 4.dp
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically // 아이콘과 TextField 정렬을 위해 CenterVertically 유지 또는 필요시 Alignment.Bottom 등으로 조절
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onClipClick) {
                 Icon(
@@ -408,7 +444,6 @@ fun MessageInputArea(
                 onValueChange = onTextChanged,
                 modifier = Modifier
                     .weight(1f)
-
                     .heightIn(min = 32.dp, max = 64.dp),
                 maxLines = 2,
                 placeholder = { Text("메시지 입력", style = TextStyle(fontSize = 14.sp, color = NavIconUnselected, fontFamily = GothicA1)) },
@@ -439,7 +474,7 @@ fun MessageInputArea(
         }
     }
 }
-// --- 첨부파일 옵션 패널 ---
+
 @Composable
 fun AttachmentOptionsPanel(
     modifier: Modifier = Modifier,
@@ -451,10 +486,10 @@ fun AttachmentOptionsPanel(
 ) {
     Surface(
         modifier = modifier
-            .fillMaxWidth()
-            .background(ScreenBackground),
+            .fillMaxWidth(),
         shadowElevation = 8.dp,
-        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+        color = ScreenBackground
     ) {
         Column(
             modifier = Modifier.padding(vertical = 16.dp)
@@ -499,14 +534,13 @@ fun AttachmentOptionItem(iconResId: Int, label: String, onClick: () -> Unit) {
     }
 }
 
-
-// --- 날짜 선택기 ---
 @Composable
 fun MessageDatePicker(
     modifier: Modifier = Modifier,
     currentYear: Int,
     currentMonth: Int,
     selectedDate: Int?,
+    datesWithConversations: Set<LocalDate>,
     onDateSelected: (Int, Int, Int) -> Unit,
     onMonthChange: (Int, Int) -> Unit,
     onDismiss: () -> Unit
@@ -541,7 +575,7 @@ fun MessageDatePicker(
                 }) {
                     Icon(painterResource(id = R.drawable.ic_custom_arrow_left), "Previous Month", tint = TextPrimary)
                 }
-                Text("${currentYear}년 $monthName", style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextPrimary, fontFamily = GothicA1)) // 수정됨
+                Text("${currentYear}년 $monthName", style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextPrimary, fontFamily = GothicA1))
                 IconButton(onClick = {
                     calendar.add(Calendar.MONTH, 1)
                     onMonthChange(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH))
@@ -567,7 +601,13 @@ fun MessageDatePicker(
                         if (dayIndex >= emptySlots && dayIndex < totalSlots) {
                             val day = dayIndex - emptySlots + 1
                             val isSelected = day == selectedDate
-                            val hasConversation = (day % 3 == 0)
+
+                            val currentDateBeingRendered = try {
+                                LocalDate.of(currentYear, currentMonth + 1, day)
+                            } catch (e: Exception) {
+                                null
+                            }
+                            val hasConversation = currentDateBeingRendered != null && datesWithConversations.contains(currentDateBeingRendered)
 
                             Box(
                                 modifier = Modifier
@@ -577,15 +617,19 @@ fun MessageDatePicker(
                                     .background(
                                         when {
                                             isSelected -> SelectedMonthlyBorder
-                                            else -> Color.Transparent // androidx.compose.ui.graphics.Color 사용
+                                            else -> Color.Transparent
                                         }
                                     )
                                     .border(
                                         width = if (isSelected) 0.dp else if (hasConversation) 1.5.dp else 0.dp,
-                                        color = if (hasConversation && !isSelected) SelectedMonthlyBorder.copy(alpha=0.7f) else Color.Transparent, // androidx.compose.ui.graphics.Color 사용
+                                        color = if (hasConversation && !isSelected) SelectedMonthlyBorder.copy(alpha=0.7f) else Color.Transparent,
                                         shape = CircleShape
                                     )
-                                    .clickable(enabled = hasConversation) { onDateSelected(currentYear, currentMonth, day) },
+                                    .clickable(enabled = currentDateBeingRendered != null) {
+                                        currentDateBeingRendered?.let {
+                                            onDateSelected(it.year, it.monthValue - 1, it.dayOfMonth)
+                                        }
+                                    },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -621,7 +665,6 @@ fun MessageDatePicker(
     }
 }
 
-// --- Preview ---
 @Preview(showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
 fun MessageScreenPreview() {

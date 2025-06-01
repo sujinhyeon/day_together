@@ -55,20 +55,18 @@ fun ActualHomeScreenContent(
     onDeleteEventRequest: (LocalDate, CalendarEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // --- 표시될 년/월 결정 ---
-    // 주간 뷰일 때는 항상 현재 시스템의 년/월을 사용하고,
-    // 월간 뷰일 때는 HomeScreen에서 전달받은 currentYearMonth (사용자가 선택한 년/월)를 사용합니다.
     val displayYearMonth = if (isMonthlyView) currentYearMonth else YearMonth.now()
-    val displayYearMonthFormatted = remember(displayYearMonth) { // displayYearMonth가 바뀔 때만 재계산
+    val displayYearMonthFormatted = remember(displayYearMonth) {
         DateTimeFormatter.ofPattern("yyyy년 MM월", Locale.KOREAN).format(displayYearMonth)
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize()) { // 전체 화면을 채우는 Box
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxSize() // Box의 크기를 모두 사용
                 .background(ScreenBackground)
         ) {
+            // --- 상단 고정 영역 ---
             AnniversaryBoard(text = upcomingAnniversaryText)
             Spacer(modifier = Modifier.height(24.dp))
             DDaySectionView(
@@ -79,45 +77,51 @@ fun ActualHomeScreenContent(
             )
             Spacer(modifier = Modifier.height(24.dp))
 
-            Column(
-                modifier = Modifier.weight(1f).padding(horizontal = 20.dp)
-            ) {
-                if (!isMonthlyView) { // 주간 뷰일 때
+            // --- 중간 영역: 캘린더 또는 주간 뷰 (이 영역이 남은 공간을 차지) ---
+            if (isMonthlyView) {
+                // MonthlyCalendarView는 여기서 직접 weight를 받아 확장됩니다.
+                // 년월 표시 헤더는 MonthlyCalendarView 내부에 있으므로 별도 Spacer나 Text 불필요.
+                MonthlyCalendarView(
+                    currentMonth = currentYearMonth,
+                    onMonthChange = onMonthChange,
+                    onDateClick = onDateClick,
+                    eventsByDate = eventsByDate,
+                    selectedDateForDetails = selectedDateForDetails,
+                    dateForBorderOnly = dateForBorderOnly,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f) // << 핵심: 사용 가능한 수직 공간을 모두 차지
+                        .padding(horizontal = 20.dp), // 캘린더 좌우 패딩은 여기에 적용
+                    onEditEventRequest = onEditEventRequest,
+                    onDeleteEventRequest = onDeleteEventRequest,
+                    onTitleClick = onMonthlyCalendarHeaderTitleClick,
+                    onCalendarIconClick = onMonthlyCalendarHeaderIconClick,
+                    onTodayHeaderButtonClick = onMonthlyTodayButtonClick
+                )
+            } else { // 주간 뷰
+                Column(
+                    modifier = Modifier
+                        .weight(1f) // 주간 뷰 영역도 남은 공간을 차지하도록 설정 (필요에 따라 조절)
+                        .padding(horizontal = 20.dp)
+                ) {
                     Text(
-                        text = displayYearMonthFormatted, // ★ 수정: 항상 현재 년/월 기준 포맷팅된 값 사용
+                        text = displayYearMonthFormatted,
                         color = TextPrimary,
                         style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold, fontSize = 23.sp),
                         modifier = Modifier
                             .align(Alignment.Start)
-                            .clickable { onToggleCalendarView() } // 클릭 시 월간 뷰로 전환
+                            .clickable { onToggleCalendarView() }
                             .padding(bottom = 16.dp)
                     )
-                } else {
-                    Spacer(modifier = Modifier.height(MaterialTheme.typography.headlineSmall.fontSize.value.dp + 16.dp))
-                }
-
-                if (isMonthlyView) {
-                    MonthlyCalendarView(
-                        currentMonth = currentYearMonth, // 사용자가 선택/변경한 currentYearMonth 전달
-                        onMonthChange = onMonthChange,
-                        onDateClick = onDateClick,
-                        eventsByDate = eventsByDate,
-                        selectedDateForDetails = selectedDateForDetails,
-                        dateForBorderOnly = dateForBorderOnly,
-                        modifier = Modifier.fillMaxWidth(),
-                        onEditEventRequest = onEditEventRequest,
-                        onDeleteEventRequest = onDeleteEventRequest,
-                        onTitleClick = onMonthlyCalendarHeaderTitleClick, // 클릭 시 주간 뷰로 전환
-                        onCalendarIconClick = onMonthlyCalendarHeaderIconClick,
-                        onTodayHeaderButtonClick = onMonthlyTodayButtonClick
-                    )
-                } else { // 주간 뷰
                     WeeklyCalendarView(
-                        // weeklyCalendarData는 HomeScreen에서 이미 '오늘'이 포함된 주로 계산된 데이터
                         weeklyCalendarData = weeklyCalendarData,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth() // 주간 뷰 자체는 내용만큼의 높이
                     )
                 }
+            }
+
+            // --- 하단 고정 영역 (캘린더 또는 주간 뷰 아래, 명언 위) ---
+            Column(modifier = Modifier.padding(horizontal = 20.dp)) { // 하단 UI들을 그룹화
                 Spacer(modifier = Modifier.height(24.dp))
                 TodayQuestionHeaderWithAlert(isAnsweredByAll = isQuestionAnsweredByAll)
                 Spacer(modifier = Modifier.height(12.dp))
@@ -128,10 +132,10 @@ fun ActualHomeScreenContent(
                     onRefreshQuestionClicked = onRefreshQuestionClicked,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
-                Spacer(modifier = Modifier.height(16.dp)) // 질문 새로고침 버튼과 하단 명언 사이 간격
+                Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // 명언 뷰 표시 조건은 그대로 유지
+            // --- 최하단 명언 뷰 ---
             val showQuote = !isMonthlyView && !isBottomBarVisible && !showAddEventInputScreen
             if (showQuote) {
                 QuoteView(
@@ -139,8 +143,7 @@ fun ActualHomeScreenContent(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 20.dp)
                 )
             } else {
-                // 명언이 없을 때도 일정한 하단 여백을 주기 위함 (선택 사항)
-                Spacer(modifier = Modifier.height(20.dp + (MaterialTheme.typography.bodyMedium.fontSize.value.dp * 2))) // 대략적인 QuoteView 높이만큼
+                Spacer(modifier = Modifier.height(20.dp + (MaterialTheme.typography.bodyMedium.fontSize.value.dp * 2)))
             }
         } // End of main content Column
     } // End of Box

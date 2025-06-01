@@ -1,4 +1,3 @@
-// 파일 경로: com/example/daytogether/ui/home/composables/AddEventInputView.kt (실제 경로에 맞게)
 package com.example.daytogether.ui.home.composables
 
 import androidx.compose.animation.AnimatedVisibility
@@ -18,8 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-// import androidx.compose.ui.draw.shadow // shadow는 Card의 elevation으로 대체 가능
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
@@ -38,7 +35,7 @@ fun AddEventInputView(
     visible: Boolean,
     targetDate: LocalDate,
     eventDescription: String,
-    isEditing: Boolean, // <<< "수정 모드"인지 여부를 나타내는 파라미터 추가
+    isEditing: Boolean,
     onDescriptionChange: (String) -> Unit,
     onSave: () -> Unit,
     onCancel: () -> Unit,
@@ -46,9 +43,9 @@ fun AddEventInputView(
 ) {
     val dateFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd (E)", Locale.KOREAN)
     val focusManager = LocalFocusManager.current
-    val cardBackgroundColor = ScreenBackground // 기존 배경색 유지
+    val cardBackgroundColor = ScreenBackground
 
-    // 헤더 제목 결정
+
     val headerTitle = if (isEditing) "일정 편집" else "새 일정"
 
     AnimatedVisibility(
@@ -68,7 +65,7 @@ fun AddEventInputView(
             Column(
                 modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 32.dp)
             ) {
-                // 헤더: 취소, 제목("새 일정" 또는 "일정 편집"), 저장
+
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -78,7 +75,7 @@ fun AddEventInputView(
                         Text("취소", style = MaterialTheme.typography.bodyLarge.copy(color = TextPrimary.copy(alpha = 0.8f)))
                     }
                     Text(
-                        text = headerTitle, // <<< 수정된 제목 사용
+                        text = headerTitle,
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = TextPrimary)
                     )
                     TextButton(
@@ -95,11 +92,11 @@ fun AddEventInputView(
                     }
                 }
 
-                // 제목 입력 필드 (이전과 동일)
+
                 OutlinedTextField(
                     value = eventDescription,
                     onValueChange = onDescriptionChange,
-                    // ... (나머지 OutlinedTextField 속성은 이전과 동일) ...
+
                     modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                     label = { Text("제목", style = MaterialTheme.typography.labelMedium.copy(color = TextPrimary.copy(alpha = 0.7f))) },
                     placeholder = { Text("일정 제목을 입력하세요", style = MaterialTheme.typography.bodyMedium.copy(color = TextPrimary.copy(alpha = 0.5f))) },
@@ -127,7 +124,7 @@ fun AddEventInputView(
                     textStyle = MaterialTheme.typography.bodyLarge.copy(color = TextPrimary)
                 )
 
-                // 날짜 표시 (이전과 동일)
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier

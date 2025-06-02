@@ -542,8 +542,8 @@ fun MessageDatePicker(
     val emptySlots = (firstDayOfWeekInMonth - Calendar.SUNDAY + 7) % 7
 
     Card(
-        modifier = modifier.fillMaxWidth(), // Card will fill width within the horizontal padding from call site
-        shape = RoundedCornerShape(16.dp), // All corners rounded
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         colors = CardDefaults.cardColors(containerColor = ScreenBackground)
     ) {

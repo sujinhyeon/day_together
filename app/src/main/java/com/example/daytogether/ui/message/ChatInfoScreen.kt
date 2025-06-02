@@ -71,7 +71,7 @@ fun ChatInfoScreen(navController: NavController) {
                 .padding(horizontal = 20.dp)
         ) {
             item {
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(50.dp))
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -104,13 +104,13 @@ fun ChatInfoScreen(navController: NavController) {
             }
 
             item {
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(50.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_group),
                         contentDescription = "가족 멤버 아이콘",
                         tint = TextPrimary,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(30.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -128,9 +128,8 @@ fun ChatInfoScreen(navController: NavController) {
             }
 
             item {
-                Spacer(modifier = Modifier.height(16.dp))
-                // "위 구분선" 삭제됨
-                // "아래 구분선"이 텍스트 위로 이동
+                Spacer(modifier = Modifier.height(50.dp))
+
                 Divider(color = TextPrimary, thickness = 1.dp)
                 Row(
                     modifier = Modifier
@@ -140,10 +139,10 @@ fun ChatInfoScreen(navController: NavController) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_message_invite), // 여기에 SVG 아이콘 리소스 ID 사용
+                        painter = painterResource(id = R.drawable.ic_message_invite),
                         contentDescription = "하루함께 초대하기 아이콘",
                         tint = TextPrimary,
-                        modifier = Modifier.size(20.dp) // 아이콘 크기 조절
+                        modifier = Modifier.size(30.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -151,7 +150,7 @@ fun ChatInfoScreen(navController: NavController) {
                         style = MaterialTheme.typography.bodyLarge.copy(color = TextPrimary, fontFamily = GothicA1, fontWeight = FontWeight.Bold)
                     )
                 }
-                // 원래 "아래 구분선"이었던 것은 위로 갔으므로, 여기에는 더 이상 Divider가 없음
+
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }

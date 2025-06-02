@@ -129,16 +129,29 @@ fun ChatInfoScreen(navController: NavController) {
 
             item {
                 Spacer(modifier = Modifier.height(16.dp))
+                // "위 구분선" 삭제됨
+                // "아래 구분선"이 텍스트 위로 이동
                 Divider(color = TextPrimary, thickness = 1.dp)
-                Text(
-                    text = "하루함께 초대하기",
-                    style = MaterialTheme.typography.bodyLarge.copy(color = TextPrimary, fontFamily = GothicA1, fontWeight = FontWeight.Bold),
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { }
-                        .padding(vertical = 16.dp)
-                )
-                Divider(color = TextPrimary, thickness = 1.dp)
+                        .clickable { /* TODO: 초대하기 로직 구현 */ }
+                        .padding(vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_message_invite), // 여기에 SVG 아이콘 리소스 ID 사용
+                        contentDescription = "하루함께 초대하기 아이콘",
+                        tint = TextPrimary,
+                        modifier = Modifier.size(20.dp) // 아이콘 크기 조절
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "하루함께 초대하기",
+                        style = MaterialTheme.typography.bodyLarge.copy(color = TextPrimary, fontFamily = GothicA1, fontWeight = FontWeight.Bold)
+                    )
+                }
+                // 원래 "아래 구분선"이었던 것은 위로 갔으므로, 여기에는 더 이상 Divider가 없음
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }

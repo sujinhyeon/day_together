@@ -99,12 +99,8 @@ fun MessageScreen(
     ) { innerPadding ->
         Box(modifier = modifier.padding(innerPadding).fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {
-
                 PinnedChatbotMessageBubble()
-
-                ChatMessagesList(modifier = Modifier.weight(1f), messages = sampleMessages
-                )
-
+                ChatMessagesList(modifier = Modifier.weight(1f), messages = sampleMessages)
                 MessageInputArea(
                     text = messageText,
                     onTextChanged = { messageText = it },
@@ -122,18 +118,14 @@ fun MessageScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(Color.Black.copy(alpha = 0.3f))
-                        .clickable(onClick = { showDatePicker = false }, enabled = true)
-
+                        .clickable(onClick = { showDatePicker = false })
                 ) {
                     MessageDatePicker(
                         modifier = Modifier
                             .align(Alignment.TopCenter)
                             .padding(top = 56.dp)
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp))
-                            .background(ScreenBackground)
-                            .padding(16.dp)
-                            .clickable(enabled = true) {},
+                            .padding(horizontal = 24.dp) // Added horizontal padding for the card
+                            .clickable(enabled = true) {}, // To intercept clicks on the card area
                         currentYear = selectedYear,
                         currentMonth = selectedMonth,
                         selectedDate = selectedDisplayDate,
@@ -164,18 +156,10 @@ fun MessageScreen(
                     AttachmentOptionsPanel(
                         modifier = Modifier.align(Alignment.BottomCenter),
                         onDismiss = { showAttachmentOptions = false },
-                        onAlbumClick = {
-                            showAttachmentOptions = false
-                        },
-                        onCameraClick = {
-                            showAttachmentOptions = false
-                        },
-                        onFileClick = {
-                            showAttachmentOptions = false
-                        },
-                        onVoiceMessageClick = {
-                            showAttachmentOptions = false
-                        }
+                        onAlbumClick = { showAttachmentOptions = false },
+                        onCameraClick = { showAttachmentOptions = false },
+                        onFileClick = { showAttachmentOptions = false },
+                        onVoiceMessageClick = { showAttachmentOptions = false }
                     )
                 }
             }
@@ -195,7 +179,7 @@ fun MessageTopBar(
     onMoreOptionsClick: () -> Unit
 ) {
     TopAppBar(
-        title = { /* 제목 없음 */ },
+        title = { },
         navigationIcon = {
             if (!showSearchBar) {
                 IconButton(onClick = onBack) {
@@ -558,12 +542,12 @@ fun MessageDatePicker(
     val emptySlots = (firstDayOfWeekInMonth - Calendar.SUNDAY + 7) % 7
 
     Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp),
+        modifier = modifier.fillMaxWidth(), // Card will fill width within the horizontal padding from call site
+        shape = RoundedCornerShape(16.dp), // All corners rounded
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         colors = CardDefaults.cardColors(containerColor = ScreenBackground)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) { // Inner padding for calendar content
             Row(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,

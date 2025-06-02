@@ -84,7 +84,7 @@ fun HomeScreen(appNavController: NavController) {
         }
     }
     var isQuestionAnsweredByAllState by remember { mutableStateOf(false) }
-    var aiQuestionState by remember { mutableStateOf("오늘의 AI 질문 예시입니다.") }
+    var aiQuestionState by remember { mutableStateOf("AI 질문 예시입니다.") }
     var familyQuoteState by remember { mutableStateOf("\"가족 명언 예시입니다.\"") }
     val randomCloudResIds = remember { listOf(R.drawable.cloud1, R.drawable.cloud2) }
 

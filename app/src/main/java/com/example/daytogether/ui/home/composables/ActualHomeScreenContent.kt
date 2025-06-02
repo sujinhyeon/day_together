@@ -96,17 +96,18 @@ fun ActualHomeScreenContent(
             } else {
                 Column(
                     modifier = Modifier
-                        .weight(1f)
+
                         .padding(horizontal = 20.dp)
                 ) {
                     Text(
+
                         text = displayYearMonthFormatted,
                         color = TextPrimary,
-                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold, fontSize = 23.sp),
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Medium, fontSize = 21.sp),
                         modifier = Modifier
                             .align(Alignment.Start)
                             .clickable { onToggleCalendarView() }
-                            .padding(bottom = 16.dp)
+                            .padding(bottom = 20.dp) // 연월과 주간 캘린더 사이 간격
                     )
                     WeeklyCalendarView(
                         weeklyCalendarData = weeklyCalendarData,
@@ -117,7 +118,8 @@ fun ActualHomeScreenContent(
 
             if (!isMonthlyView) {
                 Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-                    Spacer(modifier = Modifier.height(24.dp))
+                    // '오늘의 질문' 섹션의 상단 간격 조절
+                    Spacer(modifier = Modifier.height(60.dp))
                     TodayQuestionHeaderWithAlert(isAnsweredByAll = isQuestionAnsweredByAll)
                     Spacer(modifier = Modifier.height(12.dp))
                     TodayQuestionContentCard(questionText = aiQuestion)
@@ -127,11 +129,13 @@ fun ActualHomeScreenContent(
                         onRefreshQuestionClicked = onRefreshQuestionClicked,
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    // '명언 문구' 섹션의 상단 간격 조절
+                    Spacer(modifier = Modifier.height(70.dp))
                 }
             }
 
-            val showQuote = !isMonthlyView && !isBottomBarVisible && !showAddEventInputScreen
+            val showQuote = !isMonthlyView && !showAddEventInputScreen && selectedDateForDetails == null
+
             if (showQuote) {
                 QuoteView(
                     quote = familyQuote,
@@ -141,8 +145,14 @@ fun ActualHomeScreenContent(
                 if (isMonthlyView) {
                     Spacer(modifier = Modifier.height(20.dp))
                 } else {
+
                     Spacer(modifier = Modifier.height(20.dp + (MaterialTheme.typography.bodyMedium.fontSize.value.dp * 2)))
                 }
+            }
+
+
+            if (!isMonthlyView) {
+                Spacer(Modifier.weight(1f))
             }
         }
     }

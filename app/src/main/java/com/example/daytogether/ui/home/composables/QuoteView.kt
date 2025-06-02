@@ -19,6 +19,6 @@ fun QuoteView(quote: String, modifier: Modifier = Modifier) {
         textAlign = TextAlign.Center,
         modifier = modifier
             .fillMaxWidth()
-        // .padding(vertical = 12.dp) // 외부에서 vertical padding 제어하도록 주석 처리
+
     )
 }

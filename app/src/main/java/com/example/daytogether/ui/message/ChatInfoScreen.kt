@@ -92,7 +92,7 @@ fun ChatInfoScreen(navController: NavController) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "하루함께 개설일",
-                        style = MaterialTheme.typography.bodySmall.copy(color = OtherMonthDayText, fontFamily = GothicA1)
+                        style = MaterialTheme.typography.bodySmall.copy(color = TextPrimary, fontFamily = GothicA1)
                     )
                     Text(
                         text = creationDate,
@@ -100,7 +100,7 @@ fun ChatInfoScreen(navController: NavController) {
                     )
                 }
                 Spacer(modifier = Modifier.height(24.dp))
-                Divider(color = OtherMonthDayText, thickness = 1.dp)
+                Divider(color = TextPrimary, thickness = 1.dp)
             }
 
             item {
@@ -119,16 +119,17 @@ fun ChatInfoScreen(navController: NavController) {
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                Divider(color = OtherMonthDayText, thickness = 1.dp)
+                Divider(color = TextPrimary, thickness = 1.dp)
             }
 
             items(familyMembers) { member ->
                 FamilyMemberItem(member = member)
-                Divider(color = OtherMonthDayText.copy(alpha = 0.5f), thickness = 1.dp, modifier = Modifier.padding(start = 56.dp))
+                Divider(color = TextPrimary, thickness = 1.dp, modifier = Modifier.padding(start = 56.dp))
             }
 
             item {
                 Spacer(modifier = Modifier.height(16.dp))
+                Divider(color = TextPrimary, thickness = 1.dp)
                 Text(
                     text = "하루함께 초대하기",
                     style = MaterialTheme.typography.bodyLarge.copy(color = TextPrimary, fontFamily = GothicA1, fontWeight = FontWeight.Bold),
@@ -137,7 +138,7 @@ fun ChatInfoScreen(navController: NavController) {
                         .clickable { }
                         .padding(vertical = 16.dp)
                 )
-                Divider(color = OtherMonthDayText, thickness = 1.dp)
+                Divider(color = TextPrimary, thickness = 1.dp)
                 Spacer(modifier = Modifier.height(24.dp))
             }
         }

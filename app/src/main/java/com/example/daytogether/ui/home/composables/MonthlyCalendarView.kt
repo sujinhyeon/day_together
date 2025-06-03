@@ -11,7 +11,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,7 +30,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.draw.clip
@@ -44,7 +42,7 @@ import com.example.daytogether.ui.theme.*
 import java.time.LocalDate
 import java.time.DayOfWeek as JavaDayOfWeek
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.ui.draw.clipToBounds // clipToBounds import 추가
+import androidx.compose.ui.draw.clipToBounds
 
 @Composable
 internal fun MonthlyCalendarHeader(
@@ -65,9 +63,10 @@ internal fun MonthlyCalendarHeader(
     ) {
         IconButton(onClick = onCalendarIconClick, modifier = Modifier.size(36.dp)) {
             Icon(
-                imageVector = Icons.Filled.CalendarToday,
+                painter = painterResource(id = R.drawable.ic_calendar), // 아이콘 변경
                 contentDescription = "년/월 선택",
-                tint = TextPrimary
+                tint = TextPrimary,
+                modifier = Modifier.size(24.dp)
             )
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -81,7 +80,10 @@ internal fun MonthlyCalendarHeader(
             }
             Text(
                 text = currentMonth.format(formatter),
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold, fontSize = 23.sp),
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 21.sp
+                ),
                 color = TextPrimary,
                 modifier = Modifier
                     .clickable { onTitleClick() }
@@ -485,8 +487,8 @@ fun MonthlyCalendarViewFullPreview() {
                 eventsByDate = dummyEvents,
                 selectedDateForDetails = selectedDateForDetailsPreview,
                 dateForBorderOnly = dateForBorderOnlyPreview,
-                onEditEventRequest = { date: LocalDate, event: CalendarEvent -> },
-                onDeleteEventRequest = { date: LocalDate, event: CalendarEvent -> },
+                onEditEventRequest = { _, _ -> },
+                onDeleteEventRequest = { _, _ -> },
                 onTitleClick = { },
                 onCalendarIconClick = { },
                 onTodayHeaderButtonClick = {

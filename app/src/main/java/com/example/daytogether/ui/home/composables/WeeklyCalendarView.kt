@@ -28,13 +28,13 @@ fun WeeklyCalendarView(
 
     Box(
         modifier = modifier
-            .border( // 테두리 적용
+            .border(
                 width = 0.5.dp,
                 color = WeeklyCalendarBorderColor,
                 shape = weeklyCalendarShape
 
             )
-        // 배경색 없음, 내부 패딩 없음 (날짜 셀이 테두리에 바로 붙도록)
+
     ) {
         Row(
             modifier = Modifier

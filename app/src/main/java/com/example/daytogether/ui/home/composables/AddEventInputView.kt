@@ -59,8 +59,8 @@ fun AddEventInputView(
                 .fillMaxWidth(),
             shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomStart = 0.dp, bottomEnd = 0.dp),
             colors = CardDefaults.cardColors(containerColor = cardBackgroundColor),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp), // 그림자는 elevation으로 조절
-            border = BorderStroke(1.dp, WeeklyCalendarBorderColor.copy(alpha = 0.5f)) // <<< 테두리 추가
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+            border = BorderStroke(1.dp, WeeklyCalendarBorderColor.copy(alpha = 0.5f))
         ) {
             Column(
                 modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 32.dp)

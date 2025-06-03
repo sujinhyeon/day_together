@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -37,14 +38,45 @@ import com.example.daytogether.ui.home.composables.ActualHomeScreenContent
 import com.example.daytogether.ui.home.composables.AddEventInputView
 import com.example.daytogether.ui.home.composables.DateEventsBottomSheet
 import com.example.daytogether.ui.message.ChatInfoScreen
-import java.time.Instant
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.ZoneId
 import java.time.format.TextStyle
 import java.util.Locale
 import java.util.UUID
 import java.time.DayOfWeek as JavaDayOfWeek
+import com.example.daytogether.ui.WheelCustomYearMonthPickerDialog
+
+@Composable
+private fun DeleteConfirmationDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                "일정 삭제",
+                fontWeight = FontWeight.Medium
+            )
+        },
+        text = { Text("이 일정을 삭제하시겠습니까?") },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirm()
+                    onDismiss()
+                }
+            ) {
+                Text("삭제")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("취소")
+            }
+        }
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,7 +123,13 @@ fun HomeScreen(appNavController: NavController) {
     var showAddEventSheet by remember { mutableStateOf(false) }
     var eventToEdit by remember { mutableStateOf<CalendarEvent?>(null) }
     var dateForNewEvent by remember { mutableStateOf<LocalDate?>(null) }
-    var showHomeDatePickerDialog by remember { mutableStateOf(false) }
+    var showCustomYearMonthPicker by remember { mutableStateOf(false) }
+    var currentEventDescriptionInput by remember { mutableStateOf("") }
+
+    var showDeleteConfirmDialog by remember { mutableStateOf(false) }
+    var eventToDeleteConfirmState by remember { mutableStateOf<CalendarEvent?>(null) }
+    var dateOfEventToDeleteConfirmState by remember { mutableStateOf<LocalDate?>(null) }
+
 
     LaunchedEffect(Unit) {
         val sampleDate1 = LocalDate.now().plusDays(1)
@@ -176,132 +214,148 @@ fun HomeScreen(appNavController: NavController) {
                         onMonthlyCalendarHeaderTitleClick = { isMonthlyView = false },
                         onMonthlyCalendarHeaderIconClick = {
                             if(isMonthlyView) {
-                                showHomeDatePickerDialog = true
+                                showCustomYearMonthPicker = true
                             }
                         },
                         onRefreshQuestionClicked = { /* TODO: ViewModel */ },
                         onMonthlyTodayButtonClick = {
                             val todayDate = LocalDate.now()
                             currentYearMonth = YearMonth.from(todayDate)
-                            selectedDateForDetails = todayDate
-                            dateForBorderOnly = todayDate
+                            dateForBorderOnly = todayDate // 오늘 날짜에 테두리만 표시
+                            selectedDateForDetails = null // 상세 정보는 바로 표시하지 않음
                             showAddEventSheet = false
                         },
                         onEditEventRequest = { date, event ->
                             dateForNewEvent = date
                             eventToEdit = event
+                            currentEventDescriptionInput = event.description
                             showAddEventSheet = true
                             selectedDateForDetails = null
                         },
                         onDeleteEventRequest = { date, event ->
-                            eventsByDateState[date] = eventsByDateState[date]?.filterNot { it.id == event.id } ?: emptyList()
-                            println("캘린더에서 직접 삭제 요청: $event on $date")
+                            eventToDeleteConfirmState = event
+                            dateOfEventToDeleteConfirmState = date
+                            showDeleteConfirmDialog = true
                         }
                     )
 
                     if (selectedDateForDetails != null && !showAddEventSheet) {
-                        DateEventsBottomSheet(
-                            visible = true,
-                            targetDate = selectedDateForDetails!!,
-                            events = eventsByDateState[selectedDateForDetails!!] ?: emptyList(),
-                            onDismiss = {
-                                selectedDateForDetails = null
-                                dateForBorderOnly = null
-                            },
-                            onAddNewEventClick = {
-                                dateForNewEvent = selectedDateForDetails
-                                eventToEdit = null
-                                showAddEventSheet = true
-                                selectedDateForDetails = null
-                                dateForBorderOnly = null
-                            },
-                            onEditEvent = { eventToEditFromSheet ->
-                                dateForNewEvent = selectedDateForDetails
-                                eventToEdit = eventToEditFromSheet
-                                showAddEventSheet = true
-                                selectedDateForDetails = null
-                                dateForBorderOnly = null
-                            },
-                            onDeleteEvent = { eventToDelete ->
-                                val currentEvents = eventsByDateState[selectedDateForDetails!!]?.toMutableList()
-                                currentEvents?.remove(eventToDelete)
-                                if (currentEvents != null) {
-                                    eventsByDateState[selectedDateForDetails!!] = currentEvents
-                                }
-                                println("바텀시트에서 삭제: $eventToDelete")
-                                if (eventsByDateState[selectedDateForDetails!!].isNullOrEmpty()) {
+                        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+                            DateEventsBottomSheet(
+                                visible = true,
+                                targetDate = selectedDateForDetails!!,
+                                events = eventsByDateState[selectedDateForDetails!!] ?: emptyList(),
+                                onDismiss = {
                                     selectedDateForDetails = null
-                                    dateForBorderOnly = null
+                                    // dateForBorderOnly = null // Dismiss 시에는 테두리 유지 여부 결정 필요, 일단 유지
+                                },
+                                onAddNewEventClick = {
+                                    dateForNewEvent = selectedDateForDetails
+                                    eventToEdit = null
+                                    currentEventDescriptionInput = ""
+                                    showAddEventSheet = true
+                                    selectedDateForDetails = null
+                                    // dateForBorderOnly = null
+                                },
+                                onEditEvent = { eventToEditFromSheet ->
+                                    dateForNewEvent = selectedDateForDetails
+                                    eventToEdit = eventToEditFromSheet
+                                    currentEventDescriptionInput = eventToEditFromSheet.description
+                                    showAddEventSheet = true
+                                    selectedDateForDetails = null
+                                    // dateForBorderOnly = null
+                                },
+                                onDeleteEventRequested = { eventToDelete ->
+                                    eventToDeleteConfirmState = eventToDelete
+                                    dateOfEventToDeleteConfirmState = selectedDateForDetails // 상세 목록의 현재 날짜
+                                    showDeleteConfirmDialog = true
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
 
                     if (showAddEventSheet && dateForNewEvent != null) {
-                        AddEventInputView(
-                            visible = true,
-                            targetDate = dateForNewEvent!!,
-                            eventDescription = eventToEdit?.description ?: "",
-                            isEditing = eventToEdit != null,
-                            onDescriptionChange = { newDescription ->
-                                println("입력값 변경: $newDescription")
-                            },
-                            onSave = {
-                                val newDescription = eventToEdit?.description ?: "새로운 일정 내용"
-                                if (eventToEdit != null) {
-                                    println("수정 저장: ${eventToEdit!!.id} - $newDescription")
-                                    val ScurrentEvents = eventsByDateState[dateForNewEvent!!]?.toMutableList()
-                                    val index = ScurrentEvents?.indexOfFirst { it.id == eventToEdit!!.id }
-                                    if (index != null && index != -1) {
-                                        ScurrentEvents?.set(index, eventToEdit!!.copy(description = newDescription))
-                                        eventsByDateState[dateForNewEvent!!] = ScurrentEvents!!
+                        val isInEditMode = eventToEdit != null
+                        Box(modifier = Modifier.align(Alignment.BottomCenter)) {
+                            AddEventInputView(
+                                visible = true,
+                                targetDate = dateForNewEvent!!,
+                                eventDescription = currentEventDescriptionInput,
+                                isEditing = isInEditMode,
+                                onDescriptionChange = { newDescription ->
+                                    currentEventDescriptionInput = newDescription
+                                },
+                                onSave = {
+                                    val descriptionToSave = currentEventDescriptionInput.trim()
+                                    if (descriptionToSave.isNotBlank()) {
+                                        if (isInEditMode && eventToEdit != null) {
+                                            val updatedEvent = eventToEdit!!.copy(description = descriptionToSave)
+                                            val currentEvents = eventsByDateState[dateForNewEvent!!]?.toMutableList() ?: mutableListOf()
+                                            val index = currentEvents.indexOfFirst { it.id == updatedEvent.id }
+                                            if (index != -1) {
+                                                currentEvents[index] = updatedEvent
+                                                eventsByDateState[dateForNewEvent!!] = currentEvents
+                                            }
+                                            println("수정 저장: ${updatedEvent.id} - $descriptionToSave")
+                                        } else {
+                                            val newEvent = CalendarEvent(
+                                                id = UUID.randomUUID().toString(),
+                                                description = descriptionToSave,
+                                                date = dateForNewEvent!!
+                                            )
+                                            val currentEvents = eventsByDateState[dateForNewEvent!!]?.toMutableList() ?: mutableListOf()
+                                            currentEvents.add(newEvent)
+                                            eventsByDateState[dateForNewEvent!!] = currentEvents
+                                            println("새 일정 저장: $newEvent")
+                                        }
                                     }
-                                } else {
-                                    val newEvent = CalendarEvent(
-                                        id = UUID.randomUUID().toString(),
-                                        description = newDescription,
-                                        date = dateForNewEvent!!
-                                    )
-                                    val currentEvents = eventsByDateState[dateForNewEvent!!]?.toMutableList() ?: mutableListOf()
-                                    currentEvents.add(newEvent)
-                                    eventsByDateState[dateForNewEvent!!] = currentEvents
-                                    println("새 일정 저장: $newEvent")
+                                    showAddEventSheet = false
+                                    eventToEdit = null
+                                    dateForNewEvent = null
+                                    currentEventDescriptionInput = ""
+                                },
+                                onCancel = {
+                                    showAddEventSheet = false
+                                    eventToEdit = null
+                                    dateForNewEvent = null
+                                    currentEventDescriptionInput = ""
                                 }
-                                showAddEventSheet = false
-                                eventToEdit = null
-                                dateForNewEvent = null
+                            )
+                        }
+                    }
+
+                    if (showCustomYearMonthPicker) {
+                        WheelCustomYearMonthPickerDialog(
+                            initialYearMonth = currentYearMonth,
+                            onDismissRequest = {
+                                showCustomYearMonthPicker = false
                             },
-                            onCancel = {
-                                showAddEventSheet = false
-                                eventToEdit = null
-                                dateForNewEvent = null
+                            onConfirm = { selectedYearMonth ->
+                                currentYearMonth = selectedYearMonth
+                                selectedDateForDetails = null
+                                dateForBorderOnly = null
                             }
                         )
                     }
 
-                    if (showHomeDatePickerDialog) {
-                        val datePickerState = rememberDatePickerState(
-                            initialSelectedDateMillis = currentYearMonth.atDay(1).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-                        )
-                        DatePickerDialog(
-                            onDismissRequest = { showHomeDatePickerDialog = false },
-                            confirmButton = {
-                                TextButton(onClick = {
-                                    datePickerState.selectedDateMillis?.let { millis ->
-                                        val selectedLocalDate = Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate()
-                                        currentYearMonth = YearMonth.from(selectedLocalDate)
-                                        selectedDateForDetails = null
-                                        dateForBorderOnly = null
-                                    }
-                                    showHomeDatePickerDialog = false
-                                }) { Text("확인") }
+                    if (showDeleteConfirmDialog && eventToDeleteConfirmState != null && dateOfEventToDeleteConfirmState != null) {
+                        DeleteConfirmationDialog(
+                            onConfirm = {
+                                val date = dateOfEventToDeleteConfirmState!!
+                                val event = eventToDeleteConfirmState!!
+                                eventsByDateState[date] = eventsByDateState[date]?.filterNot { it.id == event.id } ?: emptyList()
+
+                                if (eventsByDateState[date].isNullOrEmpty() && selectedDateForDetails == date) {
+                                    selectedDateForDetails = null
+                                    dateForBorderOnly = null
+                                }
                             },
-                            dismissButton = {
-                                TextButton(onClick = { showHomeDatePickerDialog = false }) { Text("취소") }
+                            onDismiss = {
+                                showDeleteConfirmDialog = false
+                                eventToDeleteConfirmState = null
+                                dateOfEventToDeleteConfirmState = null
                             }
-                        ) {
-                            DatePicker(state = datePickerState)
-                        }
+                        )
                     }
                 }
             }

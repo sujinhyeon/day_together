@@ -11,12 +11,13 @@ from dotenv import load_dotenv
 # 스케줄러 모듈 import (상대경로)
 from .scheduler import start_scheduler, generate_question
 
-# 환경변수 로드 (.env 사용 시)
-load_dotenv()
 
 # ── Firebase 서비스 계정 키 경로 (절대 경로) ──
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 KEY_PATH = os.path.join(BASE_DIR, '..', 'firebase-service-account.json')
+DOTENV_PATH = os.path.join(BASE_DIR, "..", ".env")
+load_dotenv(DOTENV_PATH)
+
 cred = credentials.Certificate(KEY_PATH)
 firebase_admin.initialize_app(cred)
 
@@ -25,13 +26,14 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
 # ── Firebase Web API Key ──
-FIREBASE_WEB_API_KEY = "AIzaSyC_DtavGFueJHK_QexFs6jRx16PyxLVRaw"
+FIREBASE_WEB_API_KEY = os.getenv("FIREBASE_WEB_API_KEY")
 
-# ── 네이버 OAuth 설정 ──
-NAVER_CLIENT_ID     = "6SC5aZWdmK0Mrtg84_Vh"
-NAVER_CLIENT_SECRET = "K1K6RC6ZYw"
+# ── Naver API Key ──
+NAVER_CLIENT_ID     = os.getenv("NAVER_CLIENT_ID")
+NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET")
+
 # FastAPI 엔드포인트와 완전히 일치해야 함
-NAVER_REDIRECT_URI = "http://localhost:8000/auth/naver/callback"  # e.g. http://localhost:8000/auth/naver/callback
+NAVER_REDIRECT_URI  = os.getenv("NAVER_REDIRECT_URI")
 
 # 간단한 인메모리 state 저장소 (실서비스에선 Redis/DB 사용)
 _state_store: set[str] = set()

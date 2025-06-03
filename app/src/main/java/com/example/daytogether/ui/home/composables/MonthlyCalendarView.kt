@@ -30,6 +30,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.draw.clip
@@ -43,7 +44,7 @@ import java.time.LocalDate
 import java.time.DayOfWeek as JavaDayOfWeek
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.draw.clipToBounds
-
+import java.util.UUID
 @Composable
 internal fun MonthlyCalendarHeader(
     currentMonth: YearMonth,
@@ -61,12 +62,12 @@ internal fun MonthlyCalendarHeader(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        IconButton(onClick = onCalendarIconClick, modifier = Modifier.size(36.dp)) {
+        IconButton(onClick = onCalendarIconClick, modifier = Modifier.size(40.dp)) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_calendar), // 아이콘 변경
+                painter = painterResource(id = R.drawable.ic_calendar),
                 contentDescription = "년/월 선택",
                 tint = TextPrimary,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(28.dp)
             )
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -213,8 +214,10 @@ fun MonthlyCalendarView(
                     horizontalArrangement = Arrangement.Absolute.spacedBy(0.dp),
                     verticalArrangement = Arrangement.spacedBy(verticalSpacingBetweenRows)
                 ) {
-                    items(daysInGrid.size) { index ->
-                        val dayInfo = daysInGrid[index]
+                    items(
+                        items = daysInGrid,
+                        key = { dayInfoNullable -> dayInfoNullable?.date?.toEpochDay() ?: UUID.randomUUID() }
+                    ) { dayInfo ->
                         MonthlyDayCell(
                             date = dayInfo?.date,
                             isCurrentMonth = dayInfo?.isCurrentMonth ?: false,
@@ -382,7 +385,11 @@ fun EventDetailsDialog(
                 Text("등록된 일정이 없습니다.", modifier = Modifier.padding(vertical = 16.dp).fillMaxWidth(), textAlign = TextAlign.Center)
             } else {
                 LazyColumn(modifier = Modifier.heightIn(max = 240.dp)) {
-                    items(items = events, key = { event -> event.id }) { event ->
+                    // LazyColumn의 items 함수를 List를 직접 받는 형태로 수정
+                    items(
+                        items = events,
+                        key = { event -> event.id }
+                    ) { event: CalendarEvent -> // event 타입을 명시적으로 CalendarEvent로 지정
                         var showMenu by remember { mutableStateOf(false) }
                         Row(
                             modifier = Modifier

@@ -10,18 +10,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.daytogether.ui.theme.TextPrimary // 테마 색상 경로 확인
+import com.example.daytogether.ui.theme.TextPrimary
 
 @Composable
 fun DDaySectionView(
     dDayText: String,
     dDayTitle: String,
-    cloudImageResList: List<Int>, // 예: List<Int> R.drawable.cloud1 등
+    cloudImageResList: List<Int>,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column(
             horizontalAlignment = Alignment.Start
@@ -41,15 +42,21 @@ fun DDaySectionView(
                 )
             )
         }
-        Spacer(modifier = Modifier.weight(1f))
-        cloudImageResList.forEach { resId ->
-            Image(
-                painter = painterResource(id = resId),
-                contentDescription = "cloud",
-                modifier = Modifier
-                    .size(130.dp)
-                    .padding(start = 0.dp) // 필요에 따라 이미지 간 간격 조정
-            )
+
+
+
+        Row {
+            cloudImageResList.forEachIndexed { index, resId ->
+                Image(
+                    painter = painterResource(id = resId),
+                    contentDescription = "cloud",
+                    modifier = Modifier
+                        .size(100.dp)
+                )
+                if (index < cloudImageResList.size - 1) {
+                    Spacer(modifier = Modifier.width(4.dp))
+                }
+            }
         }
     }
 }

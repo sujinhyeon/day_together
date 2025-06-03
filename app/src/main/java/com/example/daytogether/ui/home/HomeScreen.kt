@@ -45,6 +45,7 @@ import java.util.Locale
 import java.util.UUID
 import java.time.DayOfWeek as JavaDayOfWeek
 import com.example.daytogether.ui.WheelCustomYearMonthPickerDialog
+import kotlin.random.Random
 
 @Composable
 private fun DeleteConfirmationDialog(
@@ -118,7 +119,27 @@ fun HomeScreen(appNavController: NavController) {
     var isQuestionAnsweredByAllState by remember { mutableStateOf(false) }
     var aiQuestionState by remember { mutableStateOf("AI 질문 예시입니다.") }
     var familyQuoteState by remember { mutableStateOf("\"가족 명언 예시입니다.\"") }
-    val randomCloudResIds = remember { listOf(R.drawable.cloud1, R.drawable.cloud2) }
+
+    val allCloudDrawables = remember {
+        listOf(
+            R.drawable.ic_cloud1,
+            R.drawable.ic_cloud2,
+            R.drawable.ic_cloud3,
+            R.drawable.ic_cloud4,
+            R.drawable.ic_cloud5,
+            R.drawable.ic_cloud6
+        )
+    }
+    val randomCloudResIds by remember {
+        mutableStateOf(
+            if (allCloudDrawables.size >= 2) {
+                allCloudDrawables.shuffled(Random(System.currentTimeMillis())).take(2)
+            } else {
+                allCloudDrawables
+            }
+        )
+    }
+
 
     var showAddEventSheet by remember { mutableStateOf(false) }
     var eventToEdit by remember { mutableStateOf<CalendarEvent?>(null) }
@@ -207,7 +228,7 @@ fun HomeScreen(appNavController: NavController) {
                                 dateForNewEvent = null
                             } else {
                                 selectedDateForDetails = null
-                                dateForBorderOnly = null
+
                             }
                         },
                         onToggleCalendarView = { isMonthlyView = !isMonthlyView },
@@ -221,8 +242,8 @@ fun HomeScreen(appNavController: NavController) {
                         onMonthlyTodayButtonClick = {
                             val todayDate = LocalDate.now()
                             currentYearMonth = YearMonth.from(todayDate)
-                            dateForBorderOnly = todayDate // 오늘 날짜에 테두리만 표시
-                            selectedDateForDetails = null // 상세 정보는 바로 표시하지 않음
+                            dateForBorderOnly = todayDate
+                            selectedDateForDetails = null
                             showAddEventSheet = false
                         },
                         onEditEventRequest = { date, event ->
@@ -247,7 +268,6 @@ fun HomeScreen(appNavController: NavController) {
                                 events = eventsByDateState[selectedDateForDetails!!] ?: emptyList(),
                                 onDismiss = {
                                     selectedDateForDetails = null
-                                    // dateForBorderOnly = null // Dismiss 시에는 테두리 유지 여부 결정 필요, 일단 유지
                                 },
                                 onAddNewEventClick = {
                                     dateForNewEvent = selectedDateForDetails
@@ -255,7 +275,6 @@ fun HomeScreen(appNavController: NavController) {
                                     currentEventDescriptionInput = ""
                                     showAddEventSheet = true
                                     selectedDateForDetails = null
-                                    // dateForBorderOnly = null
                                 },
                                 onEditEvent = { eventToEditFromSheet ->
                                     dateForNewEvent = selectedDateForDetails
@@ -263,11 +282,10 @@ fun HomeScreen(appNavController: NavController) {
                                     currentEventDescriptionInput = eventToEditFromSheet.description
                                     showAddEventSheet = true
                                     selectedDateForDetails = null
-                                    // dateForBorderOnly = null
                                 },
                                 onDeleteEventRequested = { eventToDelete ->
                                     eventToDeleteConfirmState = eventToDelete
-                                    dateOfEventToDeleteConfirmState = selectedDateForDetails // 상세 목록의 현재 날짜
+                                    dateOfEventToDeleteConfirmState = selectedDateForDetails
                                     showDeleteConfirmDialog = true
                                 }
                             )
@@ -296,7 +314,6 @@ fun HomeScreen(appNavController: NavController) {
                                                 currentEvents[index] = updatedEvent
                                                 eventsByDateState[dateForNewEvent!!] = currentEvents
                                             }
-                                            println("수정 저장: ${updatedEvent.id} - $descriptionToSave")
                                         } else {
                                             val newEvent = CalendarEvent(
                                                 id = UUID.randomUUID().toString(),
@@ -306,7 +323,6 @@ fun HomeScreen(appNavController: NavController) {
                                             val currentEvents = eventsByDateState[dateForNewEvent!!]?.toMutableList() ?: mutableListOf()
                                             currentEvents.add(newEvent)
                                             eventsByDateState[dateForNewEvent!!] = currentEvents
-                                            println("새 일정 저장: $newEvent")
                                         }
                                     }
                                     showAddEventSheet = false

@@ -12,10 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.daytogether.ui.theme.ButtonActiveBackground // 테마 색상 경로 확인
-import com.example.daytogether.ui.theme.ButtonActiveText // 테마 색상 경로 확인
-import com.example.daytogether.ui.theme.ButtonDisabledBackground // 테마 색상 경로 확인
-import com.example.daytogether.ui.theme.ButtonDisabledText // 테마 색상 경로 확인
+import com.example.daytogether.ui.theme.ButtonActiveBackground
+import com.example.daytogether.ui.theme.ButtonActiveText
+import com.example.daytogether.ui.theme.ButtonDisabledBackground
+import com.example.daytogether.ui.theme.ButtonDisabledText
 
 @Composable
 fun RefreshQuestionButton(

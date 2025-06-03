@@ -42,9 +42,9 @@ import com.example.daytogether.ui.theme.ButtonActiveText
 import com.example.daytogether.ui.theme.ButtonDisabledBackground
 import com.example.daytogether.ui.theme.ButtonDisabledText
 import com.example.daytogether.ui.theme.ErrorRed
-import com.example.daytogether.ui.theme.TextPrimary // TextPrimary 추가 (레이블 색상 등)
+import com.example.daytogether.ui.theme.TextPrimary
 
-// LoginScreen의 다양한 상태를 위한 데이터 클래스 (Preview용) - 이전과 동일
+
 data class LoginScreenState(
     val email: String = "",
     val password: String = "",
@@ -71,26 +71,25 @@ fun LoginScreen(
     val isLoginButtonEnabled = email.isNotBlank() && password.isNotBlank()
 
     DaytogetherTheme {
-        Column( // 최상위 Column
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
                 .padding(horizontal = 32.dp)
-                .verticalScroll(scrollState), // 스크롤 가능하게 유지
+                .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween // 콘텐츠를 위아래로 분산시키고, Spacer로 조절
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // (1) 상단 여백용 Spacer (fromOnboarding에 따라 다른 크기)
-            Spacer(modifier = Modifier.height(if (fromOnboarding) 80.dp else 120.dp)) // 값을 늘려서 전체적으로 아래로 밀기
 
-            // (2) 주요 입력 필드 및 버튼들을 담는 Column
+            Spacer(modifier = Modifier.height(if (fromOnboarding) 80.dp else 120.dp))
+
+
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
-                // 이 Column에는 별도의 verticalArrangement를 주지 않거나,
-                // Arrangement.Center로 내부 요소들을 중앙 정렬할 수 있습니다.
+
             ) {
-                // ID(Email) 입력 필드 섹션
+
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -142,7 +141,7 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Password 입력 필드 섹션
+
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         text = "Password",
@@ -207,11 +206,9 @@ fun LoginScreen(
                     SocialLoginIconButton(iconRes = R.drawable.ic_logo_naver, text = "네이버") { /* ... */ }
                     SocialLoginIconButton(iconRes = R.drawable.ic_logo_kakao, text = "카카오") { /* ... */ }
                 }
-            } // 주요 입력 필드 Column 끝
-
-            // (3) 하단 링크들을 담는 Column (이 Column과 주요 입력 필드 Column 사이에 Spacer를 추가할 수도 있음)
+            }
             Column(
-                modifier = Modifier.padding(bottom = if (fromOnboarding) 60.dp else 32.dp), // 하단 여백
+                modifier = Modifier.padding(bottom = if (fromOnboarding) 60.dp else 32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -236,7 +233,7 @@ fun LoginScreen(
     }
 }
 
-// SocialLoginIconButton 함수는 이전과 동일하게 유지
+
 @Composable
 fun SocialLoginIconButton(
     @DrawableRes iconRes: Int,
@@ -255,14 +252,14 @@ fun SocialLoginIconButton(
     }
 }
 
-// --- Preview 함수들 수정 ---
+// --- Preview 함수 ---
 
-// Preview 상태 제공자 (이전과 동일)
+
 class LoginScreenStateProvider : PreviewParameterProvider<LoginScreenState> {
     override val values = sequenceOf(
         LoginScreenState(), // 기본 (비활성 버튼)
-        LoginScreenState(email = "test", emailError = "올바르지 않은 이메일 형식입니다."), // 이메일 오류
-        LoginScreenState(email = "test@example.com", password = "password123", simulateFilled = true) // 입력 완료 (활성 버튼)
+        LoginScreenState(email = "test", emailError = "올바르지 않은 이메일 형식입니다."),
+        LoginScreenState(email = "test@example.com", password = "password123", simulateFilled = true)
     )
 }
 
@@ -274,7 +271,7 @@ fun LoginScreenAllStatesFromOnboardingPreview(
     DaytogetherTheme {
         LoginScreen(
             navController = rememberNavController(),
-            fromOnboarding = true, // 온보딩에서 호출된 것처럼
+            fromOnboarding = true,
             initialEmail = state.email,
             initialPassword = if (state.simulateFilled) state.password else "",
             initialEmailError = state.emailError
@@ -290,7 +287,7 @@ fun LoginScreenAllStatesStandalonePreview(
     DaytogetherTheme {
         LoginScreen(
             navController = rememberNavController(),
-            fromOnboarding = false, // 단독 화면으로 호출된 것처럼
+            fromOnboarding = false,
             initialEmail = state.email,
             initialPassword = if (state.simulateFilled) state.password else "",
             initialEmailError = state.emailError

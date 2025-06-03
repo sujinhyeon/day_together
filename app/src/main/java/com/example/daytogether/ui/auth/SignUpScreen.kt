@@ -41,7 +41,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.daytogether.R
 import com.example.daytogether.ui.theme.*
 
-// SignUpScreen 상태 Preview용 데이터 클래스
+
 data class SignUpScreenState(
     val name: String = "",
     val birthDate: String = "",
@@ -125,7 +125,7 @@ fun SignUpScreen(
 
                 SignUpTextField(label = "이름", value = name, onValueChange = { name = it }, imeAction = ImeAction.Next, focusManager = focusManager)
 
-                // 생년월일 입력 및 양력/음력 선택 (회원가입.PNG 디자인 반영)
+
                 Column(modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -135,9 +135,9 @@ fun SignUpScreen(
                             text = "생년월일",
                             style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium, fontSize = 13.sp),
                             color = TextPrimary,
-                            modifier = Modifier.padding(end = 12.dp) // 레이블과 체크박스 사이 간격
+                            modifier = Modifier.padding(end = 12.dp)
                         )
-                        // 양력/음력 선택 (체크박스와 텍스트 사용)
+
                         SolarLunarCheckbox(text = "양력", checked = !isLunarCalendar, onCheckedChange = { if (it) isLunarCalendar = false })
                         Spacer(modifier = Modifier.width(16.dp))
                         SolarLunarCheckbox(text = "음력", checked = isLunarCalendar, onCheckedChange = { if (it) isLunarCalendar = true })
@@ -146,7 +146,7 @@ fun SignUpScreen(
                     OutlinedTextField(
                         value = birthDate,
                         onValueChange = { if (it.length <= 8) birthDate = it },
-                        placeholder = { Text("ex)20040506", color = TextPrimary.copy(alpha = 0.6f), fontSize = 14.sp) }, // 플레이스홀더 수정
+                        placeholder = { Text("ex)20040506", color = TextPrimary.copy(alpha = 0.6f), fontSize = 14.sp) },
                         modifier = Modifier.fillMaxWidth().height(52.dp),
                         singleLine = true,
                         textStyle = MaterialTheme.typography.bodyMedium.copy(color = TextPrimary, fontSize = 15.sp),
@@ -167,7 +167,7 @@ fun SignUpScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // 가족 구성원 선택 섹션
+
                 FamilyMemberSelection(
                     title = "가족 구성원 중 나는?",
                     members = familyMembers,
@@ -184,7 +184,7 @@ fun SignUpScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // 회원가입 버튼
+
                 Button(
                     onClick = { /* TODO: 회원가입 로직 */ },
                     enabled = isSignUpButtonEnabled,
@@ -251,12 +251,12 @@ private fun SolarLunarCheckbox(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable { onCheckedChange(!checked) } // Row 전체 클릭으로 상태 변경
+        modifier = Modifier.clickable { onCheckedChange(!checked) }
     ) {
-        Checkbox( // Material3 Checkbox 사용
+        Checkbox(
             checked = checked,
-            onCheckedChange = onCheckedChange, // 직접 상태 변경 콜백 연결
-            modifier = Modifier.size(20.dp), // 체크박스 크기
+            onCheckedChange = onCheckedChange,
+            modifier = Modifier.size(20.dp),
             colors = CheckboxDefaults.colors(
                 checkedColor = MaterialTheme.colorScheme.primary,
                 uncheckedColor = TextPrimary.copy(alpha = 0.7f),
@@ -316,7 +316,7 @@ fun FamilyMemberSelection(
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically // 기타 항목 정렬 위해 추가
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     secondRowMembers.forEach { member ->
                         FamilyMemberItem(
@@ -326,8 +326,7 @@ fun FamilyMemberSelection(
                             modifier = Modifier.weight(1f)
                         )
                     }
-                    // 기타 항목은 남은 공간에 맞게 배치 (weight 조절)
-                    // 만약 secondRowMembers가 2개 미만이면, 기타 항목이 더 많은 공간을 차지
+
                     val otherItemWeight = (4 - secondRowMembers.size).toFloat().coerceAtLeast(1f)
 
                     Row(
@@ -358,10 +357,10 @@ fun FamilyMemberSelection(
                                 }
                             },
                             modifier = Modifier
-                                .weight(1f) // TextField가 남은 공간 채우도록
-                                .height(30.dp) // 높이 약간 줄임
+                                .weight(1f)
+                                .height(30.dp)
                                 .background(
-                                    color = if (otherChecked) ScreenBackground.copy(alpha = 0.5f) else Color.Transparent, // 활성/비활성 배경
+                                    color = if (otherChecked) ScreenBackground.copy(alpha = 0.5f) else Color.Transparent,
                                     shape = RoundedCornerShape(4.dp)
                                 )
                                 .border(

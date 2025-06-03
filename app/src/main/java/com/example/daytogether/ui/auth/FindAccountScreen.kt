@@ -27,16 +27,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.daytogether.ui.theme.* // 테마 전체 임포트
+import com.example.daytogether.ui.theme.*
 
-// FindAccountScreen 상태 Preview용 데이터 클래스
+
 data class FindAccountScreenState(
-    // 비밀번호 찾기
+
     val findPwName: String = "",
     val findPwEmail: String = "",
-    // 아이디 찾기
+
     val findIdName: String = "",
-    val findIdEmail: String = "", // 아이디 찾기에서는 이메일 사용 (디자인 참고)
+    val findIdEmail: String = "",
     val simulatePwFieldsFilled: Boolean = false,
     val simulateIdFieldsFilled: Boolean = false
 )
@@ -45,7 +45,7 @@ data class FindAccountScreenState(
 @Composable
 fun FindAccountScreen(
     navController: NavController,
-    initialState: FindAccountScreenState = FindAccountScreenState() // Preview용
+    initialState: FindAccountScreenState = FindAccountScreenState()
 ) {
     // 비밀번호 찾기 상태
     var findPwName by remember { mutableStateOf(initialState.findPwName) }
@@ -53,7 +53,7 @@ fun FindAccountScreen(
 
     // 아이디 찾기 상태
     var findIdName by remember { mutableStateOf(initialState.findIdName) }
-    var findIdEmail by remember { mutableStateOf(initialState.findIdEmail) } // Figma 디자인에서는 "이메일"로 되어 있음
+    var findIdEmail by remember { mutableStateOf(initialState.findIdEmail) }
 
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
@@ -66,7 +66,7 @@ fun FindAccountScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { /* 제목 없음, 뒤로가기 버튼만 */ },
+                    title = {  },
                     navigationIcon = {
                         IconButton(onClick = { navController.popBackStack() }) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, "뒤로가기", tint = TextPrimary)
@@ -126,7 +126,7 @@ fun FindAccountScreen(
                         disabledContentColor = TextPrimary.copy(alpha = 0.7f)
                     )
                 ) {
-                    Text("비밀번호 재설정", style = MaterialTheme.typography.labelMedium) // 버튼 텍스트 크기 조절
+                    Text("비밀번호 재설정", style = MaterialTheme.typography.labelMedium)
                 }
 
                 Divider(modifier = Modifier.padding(vertical = 32.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
@@ -145,10 +145,10 @@ fun FindAccountScreen(
                     focusManager = focusManager
                 )
                 FindAccountTextField(
-                    label = "이메일", // Figma 디자인에서는 "이메일"로 되어 있음
+                    label = "이메일",
                     value = findIdEmail,
                     onValueChange = { findIdEmail = it },
-                    keyboardType = KeyboardType.Email, // 이메일로 찾으므로
+                    keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Done,
                     focusManager = focusManager,
                     onDone = {
@@ -181,7 +181,7 @@ fun FindAccountScreen(
                 ) {
                     Text("아이디 찾기", style = MaterialTheme.typography.labelMedium)
                 }
-                Spacer(modifier = Modifier.height(24.dp)) // 하단 여백
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
@@ -227,12 +227,12 @@ private fun FindAccountTextField(
     }
 }
 
-// --- Preview 함수들 ---
+// --- Preview 함수 ---
 class FindAccountScreenStateProvider : PreviewParameterProvider<FindAccountScreenState> {
     override val values = sequenceOf(
         FindAccountScreenState(), // 기본 (모든 버튼 비활성)
-        FindAccountScreenState(findPwName = "홍길동", findPwEmail = "test@example.com", simulatePwFieldsFilled = true), // 비번찾기 활성
-        FindAccountScreenState(findIdName = "김철수", findIdEmail = "user@email.net", simulateIdFieldsFilled = true), // 아디찾기 활성
+        FindAccountScreenState(findPwName = "홍길동", findPwEmail = "test@example.com", simulatePwFieldsFilled = true), // 비밀번호 찾기 활성
+        FindAccountScreenState(findIdName = "김철수", findIdEmail = "user@email.net", simulateIdFieldsFilled = true), // 아이디찾기 활성
         FindAccountScreenState( // 모두 채워진 상태
             findPwName = "홍길동", findPwEmail = "test@example.com", simulatePwFieldsFilled = true,
             findIdName = "김철수", findIdEmail = "user@email.net", simulateIdFieldsFilled = true

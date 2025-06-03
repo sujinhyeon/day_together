@@ -1,5 +1,13 @@
 package com.example.daytogether.ui.home
 
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.text.style.TextAlign
+import com.example.daytogether.ui.home.composables.TodayQuestionHeaderWithAlert
+import com.example.daytogether.ui.home.composables.RefreshQuestionButton
 import com.example.daytogether.ui.message.MessageScreen
 import androidx.compose.foundation.layout.Arrangement
 import com.example.daytogether.ui.gallery.GalleryScreen
@@ -396,5 +404,78 @@ fun HomeScreen(appNavController: NavController) {
 fun FullHomeScreenPreview() {
     DaytogetherTheme {
         HomeScreen(appNavController = rememberNavController())
+    }
+}
+
+@Preview(name = "HomeScreen - 오늘의 질문 (모두 답변 안 함)", showBackground = true, backgroundColor = 0xFFF5F0E8)
+@Composable
+fun HomeScreenTodaysQuestionNotAnsweredPreview() {
+    DaytogetherTheme {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            TodayQuestionHeaderWithAlert(isAnsweredByAll = false)
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+            ) {
+                Text(
+                    "AI 질문 예시입니다.",
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+            Spacer(modifier = Modifier.height(18.dp))
+
+            RefreshQuestionButton(
+                isAnsweredByAll = false,
+                onRefreshQuestionClicked = {}
+            )
+        }
+    }
+}
+
+@Preview(name = "HomeScreen - 오늘의 질문 (모두 답변 완료)", showBackground = true, backgroundColor = 0xFFF5F0E8)
+@Composable
+fun HomeScreenTodaysQuestionAnsweredPreview() {
+    DaytogetherTheme {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            TodayQuestionHeaderWithAlert(isAnsweredByAll = true)
+            Spacer(modifier = Modifier.height(12.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+            ) {
+                Text(
+                    "AI 질문 예시입니다. (모두 답변)",
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+            Spacer(modifier = Modifier.height(18.dp))
+            RefreshQuestionButton(
+                isAnsweredByAll = true,
+                onRefreshQuestionClicked = {}
+            )
+        }
     }
 }

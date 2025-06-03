@@ -1,5 +1,7 @@
 package com.example.daytogether.ui.home.composables
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -10,12 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.daytogether.R // R 파일 경로 확인
-import com.example.daytogether.ui.theme.ErrorRed // 테마 색상 경로 확인
-import com.example.daytogether.ui.theme.TextPrimary // 테마 색상 경로 확인
+import com.example.daytogether.R
+import com.example.daytogether.ui.theme.ErrorRed
+import com.example.daytogether.ui.theme.TextPrimary
 
 @Composable
 fun TodayQuestionHeaderWithAlert(isAnsweredByAll: Boolean, modifier: Modifier = Modifier) {
@@ -27,7 +28,7 @@ fun TodayQuestionHeaderWithAlert(isAnsweredByAll: Boolean, modifier: Modifier = 
             Text("오늘의 질문", color = TextPrimary, style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Medium, fontSize = 21.sp))
             Spacer(modifier = Modifier.width(6.dp))
             Icon(
-                imageVector = ImageVector.vectorResource(id = if (isAnsweredByAll) R.drawable.ic_happy else R.drawable.ic_sad), // R.drawable 경로 확인
+                imageVector = ImageVector.vectorResource(id = if (isAnsweredByAll) R.drawable.ic_happy else R.drawable.ic_sad),
                 contentDescription = if (isAnsweredByAll) "답변 완료" else "답변 필요",
                 tint = TextPrimary,
                 modifier = Modifier.size(24.dp)

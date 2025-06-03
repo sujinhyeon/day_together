@@ -1,8 +1,8 @@
-package com.example.daytogether.data.model // 사용자님의 실제 패키지명
+package com.example.daytogether.data.model
 
 data class Anniversary(
     val id: String = "",
     val title: String = "",
-    val date: Long = 0L, // Timestamp (밀리초)
-    val type: String = "BIRTHDAY" // "BIRTHDAY", "WEDDING_ANNIVERSARY", "CUSTOM" 등
+    val date: Long = 0L,
+    val type: String = "BIRTHDAY"
 )

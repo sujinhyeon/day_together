@@ -229,7 +229,7 @@ fun MessageTopBar(
                         painter = painterResource(id = R.drawable.ic_calendar),
                         contentDescription = "Calendar",
                         tint = TextPrimary,
-                        modifier = Modifier.size(26.dp)
+                        modifier = Modifier.size(28.dp)
                     )
                 }
                 IconButton(onClick = onToggleSearchBar) {
@@ -276,7 +276,7 @@ fun PinnedChatbotMessageBubble() {
             contentDescription = chatbotMessage.senderName + " Avatar",
             contentScale = ContentScale.Fit,
             modifier = Modifier
-                .size(30.dp)
+                .size(60.dp)
                 .clip(CircleShape)
         )
         Spacer(modifier = Modifier.width(8.dp))

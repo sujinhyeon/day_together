@@ -147,9 +147,10 @@ fun GalleryScreen(navController: NavController) {
                     actions = {
                         IconButton(onClick = { showYearMonthPickerDialog = true }) {
                             Icon(
-                                imageVector = Icons.Filled.CalendarMonth,
+                                painter = painterResource(id = R.drawable.ic_year_month_picker),
                                 contentDescription = "날짜 선택",
-                                tint = TextPrimary
+                                tint = TextPrimary,
+                                modifier = Modifier.size(25.dp)
                             )
                         }
                     },

@@ -15,7 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.daytogether.ui.theme.DaytogetherTheme
 import kotlinx.coroutines.delay
 
-const val SPLASH_TIMEOUT = 2000L // 스플래시 화면 지속 시간 (2초)
+const val SPLASH_TIMEOUT = 2000L // 스플래시 화면 지속 시간 2초
 
 @Composable
 fun SplashScreen(onTimeout: () -> Unit) {
@@ -28,10 +28,10 @@ fun SplashScreen(onTimeout: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "하루\n함께", // Figma 스플래시 화면 참조
-                color = MaterialTheme.colorScheme.primary, // TextPrimary 색상 사용 (Theme.kt에서 primary로 매핑됨)
+                text = "하루\n함께",
+                color = MaterialTheme.colorScheme.primary,
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.displayLarge // Type.kt에서 정의한 displayLarge 스타일
+                style = MaterialTheme.typography.displayLarge
             )
         }
     }

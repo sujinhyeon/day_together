@@ -3,7 +3,6 @@ package com.example.daytogether.ui.home.composables
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-// ... 기타 필요한 androidx import 문들 ...
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height

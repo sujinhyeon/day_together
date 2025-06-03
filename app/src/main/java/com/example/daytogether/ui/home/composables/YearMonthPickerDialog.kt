@@ -31,7 +31,7 @@ import java.time.YearMonth
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-// YearMonthPickerDialog 함수는 이전 답변의 코드를 유지합니다.
+
 @Composable
 fun YearMonthPickerDialog(
     initialYearMonth: YearMonth,
@@ -65,7 +65,7 @@ fun YearMonthPickerDialog(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(180.dp), // 피커 전체 높이
+                        .height(180.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     WheelPicker(
@@ -100,30 +100,29 @@ private fun WheelPicker(
     onItemSelected: (index: Int) -> Unit,
     modifier: Modifier = Modifier,
     itemHeight: Dp = 36.dp,
-    visibleItemsCount: Int = 5 // 홀수, 중앙 아이템을 위해
+    visibleItemsCount: Int = 5
 ) {
     val pickerTotalHeight = itemHeight * visibleItemsCount
-    val extendedListCountFactor = 100 // "무한" 스크롤 효과를 위한 반복 계수
-    // 초기 선택 아이템이 "무한" 리스트의 중앙 부근에 오도록 시작 인덱스 계산
+    val extendedListCountFactor = 100
     val centralizingInitialIndex = (items.size * extendedListCountFactor / 2) - (visibleItemsCount / 2) + initialSelectedItemIndex
 
-    val listState = rememberLazyListState(initialFirstVisibleItemIndex = 0) // 초기 스크롤은 LaunchedEffect에서
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = 0)
     val coroutineScope = rememberCoroutineScope()
 
-    // 초기 로드 시 및 initialSelectedItemIndex 변경 시 중앙으로 스크롤
+
     LaunchedEffect(initialSelectedItemIndex, items.size, visibleItemsCount) {
         if (items.isNotEmpty() && initialSelectedItemIndex >= 0 && initialSelectedItemIndex < items.size) {
             val targetExtendedIndex = (items.size * extendedListCountFactor / 2) - (visibleItemsCount / 2) + initialSelectedItemIndex
             listState.scrollToItem(targetExtendedIndex.coerceAtLeast(0))
-            // 초기 선택 콜백은 스크롤이 안정화된 후 아래 LaunchedEffect에서 처리
+
         }
     }
 
-    // 스크롤 종료 시 중앙 아이템 감지, 스냅 및 콜백
+
     LaunchedEffect(listState.isScrollInProgress, items) {
         if (!listState.isScrollInProgress && listState.layoutInfo.visibleItemsInfo.isNotEmpty() && items.isNotEmpty()) {
             val layoutInfo = listState.layoutInfo
-            val viewportCenterY = layoutInfo.viewportSize.height / 2f // 뷰포트의 중앙 Y (상대적)
+            val viewportCenterY = layoutInfo.viewportSize.height / 2f
 
             val closestItemInfo = layoutInfo.visibleItemsInfo.minByOrNull { itemInfo ->
                 val itemCenterInViewport = itemInfo.offset.toFloat() + itemInfo.size.toFloat() / 2f
@@ -162,16 +161,15 @@ private fun WheelPicker(
                 val itemText = items[actualIndex]
 
                 val currentItemInfo = listState.layoutInfo.visibleItemsInfo.find { it.index == i }
-                // 아이템의 중앙이 뷰포트 중앙으로부터 얼마나 떨어져 있는지 계산
                 val itemOffsetFromViewportCenter = currentItemInfo?.let {
                     (it.offset.toFloat() + it.size.toFloat() / 2f) - (listState.layoutInfo.viewportSize.height.toFloat() / 2f)
-                } ?: Float.MAX_VALUE // 보이지 않으면 매우 큰 값으로
+                } ?: Float.MAX_VALUE
 
                 val normalizedDistance = abs(itemOffsetFromViewportCenter) / itemHeight.value.toFloat()
                 val scale = (1f - (normalizedDistance * 0.25f)).coerceIn(0.7f, 1f)
-                val alpha = (1f - (normalizedDistance * 0.45f)).coerceIn(0.35f, 1f) // 최소 알파값 상향
+                val alpha = (1f - (normalizedDistance * 0.45f)).coerceIn(0.35f, 1f)
 
-                // 중앙에 위치한 아이템(선택된 아이템) 판단 로직
+
                 val isSelected = abs(itemOffsetFromViewportCenter) < (itemHeight.value * 0.45f)
 
                 Box(
@@ -182,16 +180,16 @@ private fun WheelPicker(
                             scaleX = scale,
                             scaleY = scale,
                             alpha = alpha,
-                            transformOrigin = TransformOrigin.Center // 스케일 변환 중심
+                            transformOrigin = TransformOrigin.Center
                         )
                         .clickable {
                             coroutineScope.launch {
                                 val targetExtendedIndexToSnap = (items.size * extendedListCountFactor / 2) - (visibleItemsCount / 2) + actualIndex
                                 listState.animateScrollToItem(targetExtendedIndexToSnap.coerceAtLeast(0))
-                                // onItemSelected는 스크롤 종료 후 LaunchedEffect에서 처리
+
                             }
                         },
-                    contentAlignment = Alignment.Center // Box 내부 Text를 가로/세로 중앙 정렬
+                    contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = itemText,
@@ -199,14 +197,14 @@ private fun WheelPicker(
                         style = TextStyle(
                             fontSize = if (isSelected) 20.sp else 17.sp,
                             fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                            color = if (isSelected) Color.Black else Color.Gray.copy(alpha = alpha.coerceAtLeast(0.5f)) // 선택: 검정, 그 외: 회색+알파 (최소 0.5)
+                            color = if (isSelected) Color.Black else Color.Gray.copy(alpha = alpha.coerceAtLeast(0.5f))
                         )
                     )
                 }
             }
         }
 
-        // 중앙 선택 영역 표시선 (이전과 동일)
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()

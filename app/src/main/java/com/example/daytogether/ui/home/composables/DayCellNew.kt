@@ -1,8 +1,8 @@
 package com.example.daytogether.ui.home.composables
 
-import androidx.compose.ui.tooling.preview.Preview // Preview 사용시
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.runtime.Composable
-import com.example.daytogether.ui.theme.DaytogetherTheme // 사용자 정의 테마
+import com.example.daytogether.ui.theme.DaytogetherTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,10 +23,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.daytogether.data.model.CalendarEvent // CalendarEvent 모델 클래스 import
-import com.example.daytogether.data.model.WeeklyCalendarDay // WeeklyCalendarDay 모델 클래스 import
-import com.example.daytogether.ui.theme.AnniversaryBoardBackground // <<< 수정된 배경색 import (이미 같은 패키지라 자동 인식될 수 있음)
-import com.example.daytogether.ui.theme.TextPrimary // TextPrimary 테마 색상 import
+import com.example.daytogether.data.model.CalendarEvent
+import com.example.daytogether.data.model.WeeklyCalendarDay
+import com.example.daytogether.ui.theme.AnniversaryBoardBackground
+import com.example.daytogether.ui.theme.TextPrimary
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 
@@ -39,14 +39,14 @@ fun DayCellNew(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .fillMaxHeight()
-            // horizontal 패딩을 늘려서 셀 내부의 좌우 여백을 더 줍니다. (예: 4.dp -> 6.dp 또는 8.dp)
-            .padding(horizontal = 4.dp, vertical = 4.dp), // vertical 패딩도 유지하거나 조절
-        verticalArrangement = Arrangement.Top // 최상단 정렬은 유지
-    ) {
-        // 날짜(요일) 텍스트와 셀 상단 사이에 약간의 여백을 추가하여 아래로 내립니다.
-        Spacer(modifier = Modifier.height(5.dp)) // << 추가: 상단 여백 (원하는 만큼 조절)
 
-        // 상단: "숫자(요일)" 헤더
+            .padding(horizontal = 4.dp, vertical = 4.dp),
+        verticalArrangement = Arrangement.Top
+    ) {
+
+        Spacer(modifier = Modifier.height(5.dp))
+
+
         val annotatedDateString = buildAnnotatedString {
             withStyle(style = SpanStyle(fontSize = 13.sp, color = TextPrimary, fontWeight = FontWeight.SemiBold)) {
                 append(dateData.date)
@@ -63,7 +63,7 @@ fun DayCellNew(
                 .padding(bottom = 1.dp)
         )
 
-        // 가로 구분선
+
         HorizontalDivider(
             modifier = Modifier
                 .fillMaxWidth()
@@ -72,7 +72,7 @@ fun DayCellNew(
             color = TextPrimary.copy(alpha = 0.2f)
         )
 
-        // 하단: 이벤트 목록 (최대 4개)
+
         Column(
             modifier = Modifier
                 .weight(1f)

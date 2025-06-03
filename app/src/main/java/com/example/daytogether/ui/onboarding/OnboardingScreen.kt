@@ -32,8 +32,8 @@ data class OnboardingPageItem(
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun OnboardingScreen(navController: NavController) {
-    // ... (pagerState 및 onboardingPages 정의 유지) ...
-    val pagerState = rememberPagerState() // pagerState를 여기서 선언
+
+    val pagerState = rememberPagerState()
     val onboardingPages = listOf(
         OnboardingPageItem(
             imageRes = R.drawable.ic_cloud_sad,
@@ -87,38 +87,37 @@ fun OnboardingPageContent(item: OnboardingPageItem) {
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 30.dp)
-            // 전체적인 내용을 아래로 조금 더 내리기 위해 상단에 여백 추가 또는 verticalArrangement 조정
-            .padding(top = 120.dp), // <<-- 상단 여백 추가 (값은 조절 가능)
+            .padding(top = 120.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top // 위에서부터 배치 시작 (Spacer로 간격 조절 용이)
+        verticalArrangement = Arrangement.Top
     ) {
-        Spacer(modifier = Modifier.weight(0.15f)) // 상단 공간을 약간 띄움 (비율로 조정)
+        Spacer(modifier = Modifier.weight(0.15f))
 
         Image(
             painter = painterResource(id = item.imageRes),
             contentDescription = item.title,
             modifier = Modifier
                 .size(width = 800.dp, height = 440.dp)
-                .padding(bottom = 0.dp) // 이미지와 제목 사이 간격 (조절)
+                .padding(bottom = 0.dp)
         )
 
-        Spacer(modifier = Modifier.height(0.dp)) // 제목 위 간격 (조절)
+        Spacer(modifier = Modifier.height(0.dp))
 
         Text(
             text = item.title,
-            style = MaterialTheme.typography.headlineLarge.copy( // Type.kt의 스타일을 기반으로 굵기만 변경
-                fontWeight = FontWeight.Medium // 기존 ExtraBold에서 Bold로 변경 (또는 SemiBold)
+            style = MaterialTheme.typography.headlineLarge.copy(
+                fontWeight = FontWeight.Medium
             ),
             color = MaterialTheme.colorScheme.primary,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(bottom = 20.dp) // 제목과 구분선 사이 간격 (조절)
+            modifier = Modifier.padding(bottom = 20.dp)
         )
         Divider(
             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
             thickness = 1.dp,
             modifier = Modifier
                 .fillMaxWidth(0.9f)
-                .padding(bottom = 20.dp) // 구분선과 설명 사이 간격 (조절)
+                .padding(bottom = 20.dp)
         )
         Text(
             text = item.description,
@@ -127,7 +126,7 @@ fun OnboardingPageContent(item: OnboardingPageItem) {
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.weight(0.25f)) // 하단 공간 확보 (페이지 표시기와 겹치지 않도록)
+        Spacer(modifier = Modifier.weight(0.25f))
     }
 }
 

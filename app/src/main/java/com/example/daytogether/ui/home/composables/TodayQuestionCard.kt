@@ -15,7 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.daytogether.ui.theme.TextPrimary // 테마 색상 경로 확인
+import com.example.daytogether.ui.theme.TextPrimary
 
 @Composable
 fun TodayQuestionContentCard(questionText: String, modifier: Modifier = Modifier) {

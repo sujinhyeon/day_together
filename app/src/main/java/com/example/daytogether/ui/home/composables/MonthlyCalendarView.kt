@@ -64,10 +64,10 @@ internal fun MonthlyCalendarHeader(
     ) {
         IconButton(onClick = onCalendarIconClick, modifier = Modifier.size(40.dp)) {
             Icon(
-                painter = painterResource(id = R.drawable.ic_calendar),
-                contentDescription = "년/월 선택",
+                painter = painterResource(id = R.drawable.ic_year_month_picker),
+                contentDescription = "날짜 선택",
                 tint = TextPrimary,
-                modifier = Modifier.size(28.dp)
+                modifier = Modifier.size(25.dp)
             )
         }
         Row(verticalAlignment = Alignment.CenterVertically) {

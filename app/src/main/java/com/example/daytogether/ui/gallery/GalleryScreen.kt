@@ -2,6 +2,7 @@ package com.example.daytogether.ui.gallery
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -85,6 +86,8 @@ import com.example.daytogether.ui.theme.ButtonActiveBackground
 import com.example.daytogether.ui.theme.DaytogetherTheme
 import com.example.daytogether.ui.theme.ScreenBackground
 import com.example.daytogether.ui.theme.TextPrimary
+import com.example.daytogether.ui.theme.WeeklyCalendarBorderColor
+import com.example.daytogether.ui.WheelCustomYearMonthPickerDialog
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -117,11 +120,9 @@ fun GalleryScreen(navController: NavController) {
     val allMonthlyPhotoGroups = remember(samplePhotos, currentDisplayYearMonth) {
         val photosByYearMonth = samplePhotos.groupBy { YearMonth.from(LocalDate.parse(it.date)) }
         val distinctYearMonthsInPhotos = photosByYearMonth.keys
-
         val allDisplayableYearMonths = (distinctYearMonthsInPhotos + currentDisplayYearMonth)
             .distinct()
             .sorted()
-
         allDisplayableYearMonths.map { ym ->
             MonthlyPhotoGroupData(
                 yearMonth = ym,
@@ -150,7 +151,7 @@ fun GalleryScreen(navController: NavController) {
                                 painter = painterResource(id = R.drawable.ic_year_month_picker),
                                 contentDescription = "날짜 선택",
                                 tint = TextPrimary,
-                                modifier = Modifier.size(25.dp)
+                                modifier = Modifier.size(28.dp)
                             )
                         }
                     },
@@ -227,177 +228,6 @@ fun GalleryScreen(navController: NavController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WheelCustomYearMonthPickerDialog(
-    initialYearMonth: YearMonth,
-    onDismissRequest: () -> Unit,
-    onConfirm: (YearMonth) -> Unit,
-    yearRange: IntRange = (1900..2100)
-) {
-    val density = LocalDensity.current
-    val itemHeightDp = 40.dp
-    val itemHeightPx = density.run { itemHeightDp.toPx() }
-    val threshold = remember { itemHeightPx / 2f }
-
-    val yearListState = rememberLazyListState()
-    val monthListState = rememberLazyListState()
-
-    var userHasInteracted by remember { mutableStateOf(false) }
-
-    val internalSelectedYear by remember {
-        derivedStateOf {
-            if (yearListState.layoutInfo.visibleItemsInfo.isEmpty()) {
-                initialYearMonth.year
-            } else {
-                val firstVisibleYearIndex = yearListState.firstVisibleItemIndex
-                val scrollOffset = yearListState.firstVisibleItemScrollOffset
-                yearRange.first + firstVisibleYearIndex + if (scrollOffset >= threshold) 1 else 0
-            }
-        }
-    }
-
-    val internalSelectedMonthValue by remember {
-        derivedStateOf {
-            if (monthListState.layoutInfo.visibleItemsInfo.isEmpty()) {
-                initialYearMonth.monthValue
-            } else {
-                val firstVisibleMonthIndex = monthListState.firstVisibleItemIndex
-                val scrollOffset = monthListState.firstVisibleItemScrollOffset
-                firstVisibleMonthIndex + (if (scrollOffset >= threshold) 1 else 0) + 1
-            }
-        }
-    }
-
-    WheelCustomYearMonthPickerDialogDefaults.selectedYear = internalSelectedYear
-    WheelCustomYearMonthPickerDialogDefaults.selectedMonthValue = internalSelectedMonthValue
-
-    LaunchedEffect(initialYearMonth, yearListState.layoutInfo.totalItemsCount, monthListState.layoutInfo.totalItemsCount) {
-        if (!userHasInteracted) {
-            if (yearListState.layoutInfo.totalItemsCount > 0) {
-                val targetYearIndex = (initialYearMonth.year - yearRange.first).coerceIn(0, yearRange.count() - 1)
-                yearListState.scrollToItem(targetYearIndex)
-            }
-            if (monthListState.layoutInfo.totalItemsCount > 0) {
-                val targetMonthIndex = (initialYearMonth.monthValue - 1).coerceIn(0, 11)
-                monthListState.scrollToItem(targetMonthIndex)
-            }
-        }
-    }
-
-    AlertDialog(
-        onDismissRequest = {
-            val currentFinalSelection = YearMonth.of(internalSelectedYear, internalSelectedMonthValue)
-            onConfirm(currentFinalSelection)
-            onDismissRequest()
-        },
-        title = null,
-        text = {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 10.dp)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = {}
-                    )
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(0.85f),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    LazyColumn(
-                        state = yearListState,
-                        contentPadding = PaddingValues(vertical = 80.dp),
-                        flingBehavior = rememberSnapFlingBehavior(yearListState),
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(200.dp)
-                            .pointerInput(Unit) {
-                                awaitPointerEventScope {
-                                    awaitFirstDown(requireUnconsumed = false)
-                                    userHasInteracted = true
-                                }
-                            }
-                    ) {
-                        items(yearRange.count()) { index ->
-                            val year = yearRange.first + index
-                            val textColor by animateColorAsState(
-                                targetValue = if (year == internalSelectedYear) MaterialTheme.colorScheme.onSurface else Color.Gray,
-                                label = "yearTextColorPickerDialog"
-                            )
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(itemHeightDp)
-                            ) {
-                                BasicText(
-                                    text = "${year}년",
-                                    style = LocalTextStyle.current.copy(
-                                        fontSize = 21.sp,
-                                        fontWeight = if (year == internalSelectedYear) FontWeight.Bold else FontWeight.Normal,
-                                        color = textColor
-                                    )
-                                )
-                            }
-                        }
-                    }
-
-                    LazyColumn(
-                        state = monthListState,
-                        contentPadding = PaddingValues(vertical = 80.dp),
-                        flingBehavior = rememberSnapFlingBehavior(monthListState),
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(200.dp)
-                            .pointerInput(Unit) {
-                                awaitPointerEventScope {
-                                    awaitFirstDown(requireUnconsumed = false)
-                                    userHasInteracted = true
-                                }
-                            }
-                    ) {
-                        items(12) { index ->
-                            val month = index + 1
-                            val textColor by animateColorAsState(
-                                targetValue = if (month == internalSelectedMonthValue) MaterialTheme.colorScheme.onSurface else Color.Gray,
-                                label = "monthTextColorPickerDialog"
-                            )
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(itemHeightDp)
-                            ) {
-                                BasicText(
-                                    text = "${month}월",
-                                    style = LocalTextStyle.current.copy(
-                                        fontSize = 21.sp,
-                                        fontWeight = if (month == internalSelectedMonthValue) FontWeight.Bold else FontWeight.Normal,
-                                        color = textColor
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {},
-        dismissButton = {}
-    )
-}
-
-internal object WheelCustomYearMonthPickerDialogDefaults {
-    var selectedYear: Int = YearMonth.now().year
-    var selectedMonthValue: Int = YearMonth.now().monthValue
-
-    fun getSelection(): YearMonth = YearMonth.of(selectedYear, selectedMonthValue)
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
 fun MonthlyCommentBottomSheet(
     yearMonth: YearMonth,
     onDismiss: () -> Unit
@@ -413,108 +243,117 @@ fun MonthlyCommentBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = ScreenBackground,
-        tonalElevation = 4.dp
+        containerColor = Color.Transparent,
+        tonalElevation = 0.dp,
+        dragHandle = null
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 20.dp)
-                .imePadding()
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+            border = BorderStroke(1.dp, WeeklyCalendarBorderColor.copy(alpha = 0.5f)),
+            color = ScreenBackground, // Surface 배경색은 기존 ModalBottomSheet의 containerColor 사용
+            tonalElevation = 4.dp // 기존 ModalBottomSheet의 tonalElevation 사용
         ) {
-            Text(
-                text = "${yearMonth.format(DateTimeFormatter.ofPattern("yyyy년 MM월", Locale.KOREAN))}의 한마디",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = TextPrimary),
-                modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 16.dp)
-            )
-
-            if (comments.isEmpty()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 20.dp)
+                    .imePadding()
+            ) {
                 Text(
-                    "아직 작성된 한마디가 없어요. 첫 번째 한마디를 남겨보세요!",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TextPrimary.copy(alpha = 0.7f),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp)
+                    text = "${yearMonth.format(DateTimeFormatter.ofPattern("yyyy년 MM월", Locale.KOREAN))}의 한마디",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = TextPrimary),
+                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 16.dp)
                 )
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .weight(1f, fill = false)
-                        .heightIn(max = 200.dp)
-                ) {
-                    items(comments.size, key = { comments[it].id }) { index ->
-                        val comment = comments[index]
-                        Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(comment.author, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium, color = TextPrimary))
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(comment.timestamp, style = MaterialTheme.typography.labelSmall, color = TextPrimary.copy(alpha = 0.6f))
+
+                if (comments.isEmpty()) {
+                    Text(
+                        "아직 작성된 한마디가 없어요. 첫 번째 한마디를 남겨보세요!",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextPrimary.copy(alpha = 0.7f),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp)
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f, fill = false)
+                            .heightIn(max = 200.dp)
+                    ) {
+                        items(comments.size, key = { comments[it].id }) { index ->
+                            val comment = comments[index]
+                            Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(comment.author, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium, color = TextPrimary))
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(comment.timestamp, style = MaterialTheme.typography.labelSmall, color = TextPrimary.copy(alpha = 0.6f))
+                                }
+                                Text(comment.text, style = MaterialTheme.typography.bodyMedium, color = TextPrimary)
                             }
-                            Text(comment.text, style = MaterialTheme.typography.bodyMedium, color = TextPrimary)
-                        }
-                        if (index < comments.lastIndex) {
-                            Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                            if (index < comments.lastIndex) {
+                                Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+                            }
                         }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                OutlinedTextField(
-                    value = newCommentText,
-                    onValueChange = { newCommentText = it },
-                    placeholder = {
-                        Text(
-                            "이번 달 우리 가족에게 남기는 한마디",
-                            fontSize = 13.sp,
-                            color = TextPrimary.copy(alpha = 0.6f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(20.dp),
-                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = TextPrimary),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
-                    keyboardActions = KeyboardActions(onSend = {
-                        if (newCommentText.isNotBlank()) {
-                            comments.add(0, MonthlyComment(author = "나", text = newCommentText, timestamp = "방금 전"))
-                            newCommentText = ""
-                        }
-                    }),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent,
-                        focusedIndicatorColor = ButtonActiveBackground,
-                        unfocusedIndicatorColor = TextPrimary.copy(alpha = 0.3f),
-                        focusedLabelColor = TextPrimary,
-                        cursorColor = ButtonActiveBackground,
-                        focusedTextColor = TextPrimary,
-                        unfocusedTextColor = TextPrimary.copy(alpha = 0.8f)
-                    )
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                IconButton(
-                    onClick = {
-                        if (newCommentText.isNotBlank()) {
-                            comments.add(0, MonthlyComment(author = "나", text = newCommentText, timestamp = "방금 전"))
-                            newCommentText = ""
-                        }
-                    },
-                    enabled = newCommentText.isNotBlank()
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        painterResource(id = R.drawable.ic_send_arrow),
-                        contentDescription = "댓글 전송",
-                        tint = if (newCommentText.isNotBlank()) ButtonActiveBackground else TextPrimary.copy(alpha = 0.4f)
+                    OutlinedTextField(
+                        value = newCommentText,
+                        onValueChange = { newCommentText = it },
+                        placeholder = {
+                            Text(
+                                "이번 달 우리 가족에게 남기는 한마디",
+                                fontSize = 13.sp,
+                                color = TextPrimary.copy(alpha = 0.6f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(20.dp),
+                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = TextPrimary),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+                        keyboardActions = KeyboardActions(onSend = {
+                            if (newCommentText.isNotBlank()) {
+                                comments.add(0, MonthlyComment(author = "나", text = newCommentText, timestamp = "방금 전"))
+                                newCommentText = ""
+                            }
+                        }),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent,
+                            focusedIndicatorColor = ButtonActiveBackground,
+                            unfocusedIndicatorColor = TextPrimary.copy(alpha = 0.3f),
+                            focusedLabelColor = TextPrimary,
+                            cursorColor = ButtonActiveBackground,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary.copy(alpha = 0.8f)
+                        )
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    IconButton(
+                        onClick = {
+                            if (newCommentText.isNotBlank()) {
+                                comments.add(0, MonthlyComment(author = "나", text = newCommentText, timestamp = "방금 전"))
+                                newCommentText = ""
+                            }
+                        },
+                        enabled = newCommentText.isNotBlank()
+                    ) {
+                        Icon(
+                            painterResource(id = R.drawable.ic_send_arrow),
+                            contentDescription = "댓글 전송",
+                            tint = if (newCommentText.isNotBlank()) ButtonActiveBackground else TextPrimary.copy(alpha = 0.4f)
+                        )
+                    }
                 }
             }
         }
@@ -608,65 +447,17 @@ fun PhotoGrid(photos: List<PhotoItem>, onPhotoClick: (photoId: String) -> Unit) 
     }
 }
 
+internal object WheelCustomYearMonthPickerDialogDefaults {
+    var selectedYear: Int = YearMonth.now().year
+    var selectedMonthValue: Int = YearMonth.now().monthValue
+    fun getSelection(): YearMonth = YearMonth.of(selectedYear, selectedMonthValue)
+}
+
+
 @Preview(showBackground = true, widthDp = 390, heightDp = 844)
 @Composable
 fun GalleryScreenPreview() {
     DaytogetherTheme {
         GalleryScreen(navController = rememberNavController())
-    }
-}
-
-@Preview(showBackground = true, widthDp = 390)
-@Composable
-fun MonthlyPhotoGroupItemPreview() {
-    DaytogetherTheme {
-        val samplePhotosWithData = listOf(
-            PhotoItem("1", "https://picsum.photos/200", "2025-05-01"),
-            PhotoItem("2", "https://picsum.photos/201", "2025-05-03")
-        )
-        val samplePhotosEmpty = emptyList<PhotoItem>()
-
-        Column {
-            MonthlyPhotoGroupItem(
-                yearMonth = YearMonth.of(2025, 5),
-                photos = samplePhotosWithData,
-                yearMonthFormatter = DateTimeFormatter.ofPattern("yyyy년 MM월", Locale.KOREAN),
-                onPhotoClick = {},
-                onCommentIconClick = {}
-            )
-            Spacer(Modifier.height(20.dp))
-            MonthlyPhotoGroupItem(
-                yearMonth = YearMonth.of(2025, 6),
-                photos = samplePhotosEmpty,
-                yearMonthFormatter = DateTimeFormatter.ofPattern("yyyy년 MM월", Locale.KOREAN),
-                onPhotoClick = {},
-                onCommentIconClick = {}
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun MonthlyCommentBottomSheetPreview() {
-    DaytogetherTheme {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Spacer(modifier = Modifier.weight(1f))
-            MonthlyCommentBottomSheet(yearMonth = YearMonth.now(), onDismiss = {})
-        }
-    }
-}
-
-@Preview(showBackground = true, widthDp = 360, heightDp = 400)
-@Composable
-fun WheelCustomYearMonthPickerDialogPreview() {
-    DaytogetherTheme {
-        Surface {
-            WheelCustomYearMonthPickerDialog(
-                initialYearMonth = YearMonth.of(2025, 5),
-                onDismissRequest = { },
-                onConfirm = { }
-            )
-        }
     }
 }

@@ -37,6 +37,7 @@ import java.util.Locale
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.daytogether.ui.navigation.BottomNavItem
 import java.time.LocalDate
+import androidx.compose.foundation.BorderStroke
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -124,8 +125,8 @@ fun MessageScreen(
                         modifier = Modifier
                             .align(Alignment.TopCenter)
                             .padding(top = 56.dp)
-                            .padding(horizontal = 24.dp) // Added horizontal padding for the card
-                            .clickable(enabled = true) {}, // To intercept clicks on the card area
+                            .padding(horizontal = 24.dp)
+                            .clickable(enabled = true) {},
                         currentYear = selectedYear,
                         currentMonth = selectedMonth,
                         selectedDate = selectedDisplayDate,
@@ -134,7 +135,7 @@ fun MessageScreen(
                             val actualSelectedDate = LocalDate.of(year, month + 1, day)
                             selectedDisplayDate = day
                             showDatePicker = false
-                            println("선택된 날짜 (MessageScreen): $actualSelectedDate. 이 날짜의 메시지 로드 로직 필요.")
+                            // ...
                         },
                         onMonthChange = { year, month ->
                             selectedYear = year
@@ -339,6 +340,7 @@ fun ChatMessagesList(modifier: Modifier = Modifier, messages: List<MessageItem>)
 
 @Composable
 fun ChatMessageBubble(message: MessageItem) {
+
     val horizontalAlignment = if (message.isSentByMe) Alignment.End else Alignment.Start
     val bubbleColor = if (message.isSentByMe) ButtonActiveBackground else AnniversaryBoardBackground.copy(alpha = 0.7f)
     val textColor = if (message.isSentByMe) ButtonActiveText else TextPrimary
@@ -406,6 +408,7 @@ fun MessageInputArea(
     onClipClick: () -> Unit,
     onSendClick: () -> Unit
 ) {
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = ScreenBackground,
@@ -469,20 +472,17 @@ fun AttachmentOptionsPanel(
     onVoiceMessageClick: () -> Unit
 ) {
     Surface(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shadowElevation = 8.dp,
         shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-        color = ScreenBackground
+        color = ScreenBackground,
+        border = BorderStroke(1.dp, WeeklyCalendarBorderColor.copy(alpha = 0.5f))
     ) {
         Column(
             modifier = Modifier.padding(vertical = 16.dp)
         ) {
-            Box(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp), contentAlignment = Alignment.Center) {
-                Box(modifier = Modifier.width(40.dp).height(4.dp).background(NavIconUnselected, CircleShape))
-            }
             Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceAround,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -497,6 +497,7 @@ fun AttachmentOptionsPanel(
 
 @Composable
 fun AttachmentOptionItem(iconResId: Int, label: String, onClick: () -> Unit) {
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -529,6 +530,7 @@ fun MessageDatePicker(
     onMonthChange: (Int, Int) -> Unit,
     onDismiss: () -> Unit
 ) {
+
     val calendar = remember { Calendar.getInstance() }
     LaunchedEffect(currentYear, currentMonth) {
         calendar.set(Calendar.YEAR, currentYear)
@@ -547,7 +549,7 @@ fun MessageDatePicker(
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         colors = CardDefaults.cardColors(containerColor = ScreenBackground)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) { // Inner padding for calendar content
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,

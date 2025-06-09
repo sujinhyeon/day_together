@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
+// [통합] 최종 프로젝트 이름인 "day_together"를 사용합니다.
 rootProject.name = "day_together"
 include(":app")
- 

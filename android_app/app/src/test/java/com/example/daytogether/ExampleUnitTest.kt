@@ -1,4 +1,4 @@
-package com.example.day_together
+package com.example.daytogether
 
 import org.junit.Test
 

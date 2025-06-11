@@ -1,37 +1,22 @@
 [versions]
-# [결합] AGP와 Kotlin은 더 높은 버전으로 통일
-agp = "8.10.0"
-kotlin = "2.1.20"
-
-# [유지 및 추가] 각 파일에 있던 버전들 모두 포함
+agp = "8.9.1"
+kotlin = "2.0.21"
 coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-lifecycleRuntimeKtx = "2.9.0" # 높은 버전으로 업데이트
+lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.1"
-composeBom = "2025.05.00" # 높은 버전으로 업데이트
-
-# [추가] firebase 관련 버전들
+composeBom = "2024.09.00"
 firebaseFirestoreKtx = "25.1.4"
 firebaseAuthKtx = "23.2.0"
 firebaseAuth = "23.2.0"
-
-# [추가] 이전 UI 관련 버전들
 appcompat = "1.7.0"
 material = "1.12.0"
 activity = "1.10.1"
 constraintlayout = "2.1.4"
 
-# [추가] 새로운 라이브러리 버전들
-androidxNavigationCompose = "2.9.0"
-androidToolsDesugarJdkLibs = "2.1.5"
-androidxLifecycleViewmodelCompose = "2.9.0"
-accompanist = "0.34.0"
-coil = "2.6.0"
-
 [libraries]
-# [정리 및 통합] 두 파일의 모든 라이브러리 포함
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -39,8 +24,6 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
-
-# [유지 및 추가] Compose 관련 라이브러리
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
@@ -48,30 +31,16 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
-androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
-androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
-
-# [추가] Firebase 라이브러리
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
-
-# [추가] 이전 UI 라이브러리 (XML 기반)
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 
-# [추가] 새로운 라이브러리들
-androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidxLifecycleViewmodelCompose" }
-androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "androidxNavigationCompose" }
-coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
-google-accompanist-pager = { module = "com.google.accompanist:accompanist-pager", version.ref = "accompanist" }
-google-accompanist-pager-indicators = { module = "com.google.accompanist:accompanist-pager-indicators", version.ref = "accompanist" }
-android-tools-desugarJdkLibs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "androidToolsDesugarJdkLibs" }
-
 [plugins]
-# [유지 및 추가] 두 파일의 모든 플러그인 포함
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+

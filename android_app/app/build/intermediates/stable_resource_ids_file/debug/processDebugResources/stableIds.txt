@@ -695,6 +695,7 @@ com.example.day_together:string/m3c_tooltip_long_press_label = 0x7f1000a3
 com.example.day_together:style/TextAppearance.Material3.SearchView = 0x7f1101f7
 com.example.day_together:string/m3c_time_picker_pm = 0x7f1000a2
 com.example.day_together:style/Theme.AppCompat.Empty = 0x7f11021d
+com.example.day_together:string/web_client_id = 0x7f100113
 com.example.day_together:string/m3c_time_picker_period_toggle_description = 0x7f1000a1
 com.example.day_together:string/m3c_time_picker_hour_suffix = 0x7f10009b
 com.example.day_together:string/m3c_time_picker_hour_selection = 0x7f10009a

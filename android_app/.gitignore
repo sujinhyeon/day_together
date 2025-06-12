@@ -3,3 +3,69 @@
 /.idea/workspace.xml
 /app/build
 /app/
+
+# ───────────────────────────────────────────────
+# 운영체제
+# ───────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ───────────────────────────────────────────────
+# IDE & 편집기
+# ───────────────────────────────────────────────
+.idea/                   # IntelliJ/Android Studio 프로젝트 설정
+*.iml                    # IntelliJ 모듈 파일
+.vscode/                 # VSCode 설정
+*.sw?                    # Vim swap files
+*~                       # 에디터 백업 파일
+
+# ───────────────────────────────────────────────
+# Git 자체
+# ───────────────────────────────────────────────
+.gitignore
+.gitattributes
+
+# ───────────────────────────────────────────────
+# Android / Gradle
+# ───────────────────────────────────────────────
+# Gradle 캐시 및 빌드 아티팩트
+.gradle/
+**/build/
+android_app/.gradle/     # Android 모듈의 Gradle 캐시
+android_app/app/build/   # Android 앱 빌드 결과
+
+# 로컬 SDK 설정
+local.properties         # Android SDK 경로 등
+
+# Android Studio 관련
+captures/                # 화면 캡처
+.externalNativeBuild/    # CMake/NDK 빌드 캐시
+
+# 컴파일 산출물
+*.apk
+*.ap_
+*.dex
+*.class
+*.jar
+*.so
+
+# ───────────────────────────────────────────────
+# Kotlin / Java
+# ───────────────────────────────────────────────
+*.kotlin_module         # Kotlin 모듈 메타데이터
+*.log                   # 로그 파일(필요 시)
+
+# ───────────────────────────────────────────────
+# 백엔드 (Python / FastAPI)
+# ───────────────────────────────────────────────
+python_app/app/serviceAccountKey.json   # 민감 키 파일
+python_app/app/__pycache__/             # Python 캐시
+python_app/app/*.pyc                    # Python 컴파일 캐시
+python_app/app/.venv/                   # Python 가상환경 (venv) 디렉터리
+venv/                                # 프로젝트 루트에 venv를 쓴다면
+.env                                 # 환경 변수 파일
+
+# ───────────────────────────────────────────────
+# 기타
+# ───────────────────────────────────────────────
+*.log                                # 일반 로그 파일
